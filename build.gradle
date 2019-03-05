@@ -1,0 +1,78 @@
+plugins {
+    id 'org.springframework.boot' version '2.1.3.RELEASE' apply false
+}
+
+apply plugin: 'base'
+
+allprojects {
+    group 'ru.spring.reactive.in.practice'
+}
+
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'org.springframework.boot'
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        [enforcedPlatform('org.springframework.boot:spring-boot-dependencies:2.1.3.RELEASE'),
+         platform('org.junit:junit-bom:5.4.0'),
+        ].each {
+            implementation it
+            annotationProcessor it
+            testAnnotationProcessor it
+        }
+
+        constraints {
+            ['org.projectlombok:lombok:1.18.2'].each {
+                compileOnly it
+                annotationProcessor it
+                testAnnotationProcessor it
+            }
+
+            ['com.github.javafaker:javafaker:0.16'].each {
+                implementation it
+            }
+
+            ['org.mockito:mockito-core:2.22.0',
+             'org.mockito:mockito-junit-jupiter:2.22.0',
+             'io.github.benas:random-beans:3.7.0',
+            ].each {
+                testImplementation it
+            }
+        }
+
+        //declare dependencies
+        ['org.projectlombok:lombok',
+         'org.springframework.boot:spring-boot-configuration-processor',
+        ].each {
+            compileOnly it
+            testCompileOnly it
+            annotationProcessor it
+            testAnnotationProcessor it
+        }
+
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+
+        testImplementation 'org.mockito:mockito-core',
+                'org.mockito:mockito-junit-jupiter',
+                'org.junit.jupiter:junit-jupiter-engine',
+                'org.springframework.boot:spring-boot-starter-test'
+    }
+
+    test {
+        useJUnitPlatform()
+        testLogging {
+            exceptionFormat = 'full'
+            events 'passed', 'skipped', 'failed'
+        }
+        reports {
+            html.enabled = true
+        }
+    }
+}

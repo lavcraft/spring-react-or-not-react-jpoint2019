@@ -1,0 +1,6 @@
+server.port: 8081
+
+datasender:
+  number-of-threads: 8
+  slowMultiplier: 1
+  url: http://localhost:8080/request

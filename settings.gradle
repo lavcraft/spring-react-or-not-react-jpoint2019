@@ -1,0 +1,5 @@
+rootProject.name = 'spring-reactive-in-practice'
+
+include 'letter-grabber'
+include 'speed-adjuster-starter'
+include 'signuter-decoder-informer-noreact'
