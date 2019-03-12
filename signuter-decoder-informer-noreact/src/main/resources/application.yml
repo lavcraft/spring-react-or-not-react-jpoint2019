@@ -1,6 +1,18 @@
-server.port: 8081
-
 datasender:
   number-of-threads: 8
-  slowMultiplier: 1
+  slowMultiplier: 4
   url: http://localhost:8080/request
+
+server:
+  tomcat:
+    max-threads: 10
+  port: 8081
+logging:
+  level:
+    root: info
+#    com.naya.gameofthrones.signuterdecoderinformer.controllers: OFF
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'

@@ -1,0 +1,5 @@
+apply plugin: 'groovy'
+
+dependencies {
+    runtimeClasspath 'org.springframework.boot:spring-boot-devtools'
+}

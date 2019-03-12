@@ -2,47 +2,63 @@ package com.naya.gameofthrones.lettergrabber.services;
 
 import com.naya.gameofthrones.lettergrabber.model.Letter;
 import com.naya.gameofthrones.lettergrabber.producer.LetterProducer;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 /**
  * @author Evgeny Borisov
  */
+@Slf4j
 @Service
-@RequiredArgsConstructor
 public class LetterDistributorImpl implements LetterDistributor {
     private final LetterProducer producer;
     private final LetterSender   sender;
 
     private final AtomicInteger atomicInteger = new AtomicInteger(0);
+    private final Counter counter;
+
+    public LetterDistributorImpl(LetterProducer producer,
+                                 LetterSender sender,
+                                 MeterRegistry meterRegistry) {
+        this.producer = producer;
+        this.sender = sender;
+        this.counter = meterRegistry.counter("letterRps");
+    }
 
     @Scheduled(fixedRate = 10)
     public void send() {
-        atomicInteger.getAndAccumulate(-1, (prev, newval) -> {
+        while (true) {
             try {
-                if(prev >0 ) {
+                if (atomicInteger.get() > 0) {
                     distribute();
-                    return prev - 1;
+                    counter.increment();
                 }
             } catch (Exception e) {
-                return prev;
+                log.error("Cannot send letter");
+                try {
+                    SECONDS.sleep(1);
+                } catch (InterruptedException ex) {
+                    ex.printStackTrace();
+                }
             }
-            return 0;
-        });
+        }
     }
 
     @SneakyThrows
     @Override
     public void distribute() {
         Letter letter = producer.getLetter();
+        //TODO add letter per seconds indicator
         sender.send(letter);
-        atomicInteger.decrementAndGet();
+        atomicInteger.getAndDecrement();
     }
 
     @Override

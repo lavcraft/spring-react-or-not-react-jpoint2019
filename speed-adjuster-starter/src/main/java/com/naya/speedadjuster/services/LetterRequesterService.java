@@ -13,25 +13,27 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * @author Evgeny Borisov
  */
-@Service
-@RequiredArgsConstructor
 @Slf4j
-public class SpeedAdjusterService {
+@RequiredArgsConstructor
+public class LetterRequesterService {
     private final RestTemplate         restTemplate;
     private final AdjustmentProperties adjustmentProperties;
 
-    @Scheduled(fixedDelay = 4000)
-    public void request() {
-        syncSpeed();
+    public void request(int n) {
+        syncSpeed(n);
     }
 
-    private void syncSpeed() {
+    public void request() {
+        syncSpeed(adjustmentProperties.getSlowMultiplier() * adjustmentProperties.getNumberOfThreads());
+    }
+
+    private void syncSpeed(int n) {
         try {
             restTemplate.getForObject(
-                    adjustmentProperties.getUrl() + "/" + adjustmentProperties.getSlowMultiplier() * adjustmentProperties.getNumberOfThreads(),
+                    adjustmentProperties.getUrl() + "/" + n,
                     Void.class);
         } catch (RestClientException e) {
-            log.error("no sender url found");
+            log.error("no sender url found", e);
         }
     }
 }

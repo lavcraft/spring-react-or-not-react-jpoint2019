@@ -10,8 +10,4 @@ import java.util.List;
  */
 public interface LetterProducer {
     Letter getLetter();
-
-    void setDelay(int delay);
-
-    void setTimeToProcess(int timeToProcess);
 }

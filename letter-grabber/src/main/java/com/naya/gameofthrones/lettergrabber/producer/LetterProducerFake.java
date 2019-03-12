@@ -22,13 +22,9 @@ import static java.util.stream.Collectors.toList;
 public class LetterProducerFake implements LetterProducer {
     private final GameOfThrones faker;
 
-    private int delay                = 10;
-    private int timeToProcess        = 1;
-
     @Override
     @SneakyThrows
     public Letter getLetter() {
-        Thread.sleep(delay);
         return randomLetter();
     }
 
@@ -37,7 +33,6 @@ public class LetterProducerFake implements LetterProducer {
                 .content(faker.quote())
                 .location(faker.city())
                 .signature(faker.character())
-                .timeToProcess(timeToProcess)
                 .build();
     }
 

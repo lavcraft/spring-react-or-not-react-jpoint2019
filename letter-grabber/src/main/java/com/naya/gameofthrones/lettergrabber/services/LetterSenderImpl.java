@@ -23,13 +23,11 @@ import java.util.List;
 public class LetterSenderImpl implements LetterSender {
     private final RestTemplate restTemplate;
 
-
-
     public void send(Letter letter) {
         try {
-            restTemplate.postForObject("http://localhost:8081/analyse/letter", letter, ResponseEntity.class);
+            restTemplate.postForEntity("http://localhost:8081/analyse/letter", letter, Void.class);
         } catch (RestClientException e) {
-            log.error("no letter analyzer found");
+            log.error("no letter analyzer found", e);
         }
         log.info(letter+" was sent");
     }

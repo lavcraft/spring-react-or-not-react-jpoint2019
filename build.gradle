@@ -12,8 +12,8 @@ subprojects {
     apply plugin: 'java-library'
     apply plugin: 'org.springframework.boot'
 
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 
     repositories {
         jcenter()
@@ -35,7 +35,13 @@ subprojects {
                 testAnnotationProcessor it
             }
 
-            ['com.github.javafaker:javafaker:0.16'].each {
+            ['com.github.javafaker:javafaker:0.16',
+             'io.dropwizard.metrics:metrics-core:+',
+             'org.beryx:text-io:3.3.0',
+             'org.beryx:text-io-web:3.3.0',
+             'org.fusesource.jansi:jansi:1.17.1',
+             'org.codehaus.groovy:groovy-all:2.5.6',
+            ].each {
                 implementation it
             }
 
@@ -57,7 +63,13 @@ subprojects {
             testAnnotationProcessor it
         }
 
-        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.boot:spring-boot-starter-web',
+                'org.springframework.boot:spring-boot-starter-actuator',
+                'io.dropwizard.metrics:metrics-core',
+                'org.beryx:text-io',
+                'org.beryx:text-io-web',
+                'org.codehaus.groovy:groovy-all',
+                'org.fusesource.jansi:jansi'
 
         testImplementation 'org.mockito:mockito-core',
                 'org.mockito:mockito-junit-jupiter',
