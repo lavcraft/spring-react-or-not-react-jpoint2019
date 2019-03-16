@@ -29,6 +29,5 @@ public class LetterSenderImpl implements LetterSender {
         } catch (RestClientException e) {
             log.error("no letter analyzer found", e);
         }
-        log.info(letter+" was sent");
     }
 }

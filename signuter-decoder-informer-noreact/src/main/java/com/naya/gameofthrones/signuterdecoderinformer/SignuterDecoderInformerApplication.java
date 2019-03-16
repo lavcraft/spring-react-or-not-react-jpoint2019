@@ -13,7 +13,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class SignuterDecoderInformerApplication {
 
     public static void main(String[] args) {
-        System.setProperty("jansi.passthrough", "true");
         SpringApplication.run(SignuterDecoderInformerApplication.class, args);
     }
 

@@ -10,6 +10,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties("datasender")
 public class AdjustmentProperties {
     private String url;
-    private int    numberOfThreads = 1;
-    private int    slowMultiplier  = 1;
+    private int    letterProcessorConcurrencyLevel = 1;
+    private int    slowMultiplier                  = 1;
 }

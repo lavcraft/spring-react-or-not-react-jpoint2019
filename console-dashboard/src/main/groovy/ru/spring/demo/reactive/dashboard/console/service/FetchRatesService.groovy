@@ -19,7 +19,7 @@ class FetchRatesService {
         try {
             completedFuture restTemplate.getForObject(letterSignatureUrl, RateStatus.class)
         } catch (ignored) {
-            completedFuture new RateStatus().setLetterRps(0d)
+            completedFuture new RateStatus().setLetterRps(-1d)
         }
     }
 }

@@ -17,10 +17,10 @@ public class GuardDecisionNotifier implements Notifier {
 
     @Override
     public void sendNotification(Notification notification) {
-        try{
+        try {
             restTemplate.postForObject("http://localhost:8080/letter-status", notification, ResponseEntity.class);
             log.info("Guard notification sent");
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("no sender url found");
         }
     }

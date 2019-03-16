@@ -1,11 +1,9 @@
 datasender:
-  number-of-threads: 8
-  slowMultiplier: 4
+  slow-multiplier: 1
+  letter-processor-concurrency-level: 8
   url: http://localhost:8080/request
 
 server:
-  tomcat:
-    max-threads: 10
   port: 8081
 logging:
   level:

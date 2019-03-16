@@ -1,5 +1,5 @@
 dashboard:
-  letter-grabber-url: http://localhost:8081/actuator/rates
+  letter-grabber-url: http://localhost:8080/actuator/rates
   guard-url: http://localhost:8082/actuator/rates
-  letter-signature-url: http://localhost:8080/actuator/rates
+  letter-signature-url: http://localhost:8081/actuator/rates
 

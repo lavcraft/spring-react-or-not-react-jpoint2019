@@ -18,12 +18,6 @@ import javax.annotation.PostConstruct;
 @ConditionalOnEnabledEndpoint(endpoint = RatesMetricsEndpoint.class)
 @AutoConfigureBefore(SimpleMetricsExportAutoConfiguration.class)
 public class RatesMetricsConfiguration {
-
-    @PostConstruct
-    public void init() {
-        System.out.println("sdf = ");
-    }
-
     @Bean
     public MetricRegistry dropwizardRegistry() {
         return new MetricRegistry();
@@ -55,6 +49,6 @@ public class RatesMetricsConfiguration {
 
     @Bean
     public RatesMetricsEndpoint ratesMetricsEndpoint(MetricRegistry m) {
-        return new RatesMetricsEndpoint(m);
+        return new RatesMetricsEndpoint();
     }
 }

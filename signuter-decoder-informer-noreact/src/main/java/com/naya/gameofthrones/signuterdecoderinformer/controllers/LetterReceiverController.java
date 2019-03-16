@@ -40,10 +40,10 @@ public class LetterReceiverController {
     }
 
     @PostMapping
-    @Async
+    @Async("letterProcessorExecutor")
     public void processLetter(@RequestBody Letter letter) throws InterruptedException {
+        DecodedLetter decode = decoder.decode(letter);
         counter.increment();
-        DecodedLetter decodedLetter = decoder.decode(letter);
         letterRequesterService.request(1);
     }
 }

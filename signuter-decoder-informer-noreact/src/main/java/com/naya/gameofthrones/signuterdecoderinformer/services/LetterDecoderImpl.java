@@ -4,18 +4,14 @@ import com.naya.gameofthrones.signuterdecoderinformer.model.DecodedLetter;
 import com.naya.gameofthrones.signuterdecoderinformer.model.Letter;
 import com.naya.speedadjuster.AdjustmentProperties;
 import com.naya.speedadjuster.services.LetterRequesterService;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Field;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.TimeUnit;
-
 import static java.lang.Math.round;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -25,15 +21,13 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 @Slf4j
 @RequiredArgsConstructor
 public class LetterDecoderImpl implements LetterDecoder {
-    private final AdjustmentProperties adjustmentProperties;
-
-    private final ConcurrentLinkedQueue<Letter> letters = new ConcurrentLinkedQueue<>();
+    private final AdjustmentProperties   adjustmentProperties;
 
     @Override
     @SneakyThrows
     public DecodedLetter decode(Letter letter) {
-        MILLISECONDS.sleep(
-                round(adjustmentProperties.getSlowMultiplier() * 1000 / adjustmentProperties.getNumberOfThreads())
+        SECONDS.sleep(
+                round(adjustmentProperties.getSlowMultiplier())
         );
 
         //TODO add reflection
@@ -44,5 +38,6 @@ public class LetterDecoderImpl implements LetterDecoder {
                 .location(letter.getLocation())
                 .content(letter.getContent())
                 .build();
+
     }
 }
