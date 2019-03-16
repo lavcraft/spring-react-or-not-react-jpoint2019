@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="spring-reactive-in-practice.console-dashboard.main" target="11" />
+      <module name="spring-reactive-in-practice.console-dashboard.test" target="11" />
+      <module name="spring-reactive-in-practice.guard.main" target="11" />
+      <module name="spring-reactive-in-practice.guard.test" target="11" />
+      <module name="spring-reactive-in-practice.letter-grabber.main" target="11" />
+      <module name="spring-reactive-in-practice.letter-grabber.test" target="11" />
+      <module name="spring-reactive-in-practice.metrics-starter.main" target="11" />
+      <module name="spring-reactive-in-practice.metrics-starter.test" target="11" />
+      <module name="spring-reactive-in-practice.signuter-decoder-informer-noreact.main" target="11" />
+      <module name="spring-reactive-in-practice.signuter-decoder-informer-noreact.test" target="11" />
+      <module name="spring-reactive-in-practice.speed-adjuster-starter.main" target="11" />
+      <module name="spring-reactive-in-practice.speed-adjuster-starter.test" target="11" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
