@@ -1,1 +1,10 @@
 server.port: 8082
+
+datasender:
+  letter-box-size: 10
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'

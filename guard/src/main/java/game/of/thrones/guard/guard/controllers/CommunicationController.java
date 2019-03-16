@@ -16,6 +16,8 @@ public class CommunicationController {
     private final GuardDecider decider;
 
     @PostMapping("/guard")
-    public void updateLetterStatus(@RequestBody Notification notification){ decider.decide(notification);}
+    public void updateLetterStatus(@RequestBody Notification notification){
+        decider.decide(notification);
+    }
 
 }

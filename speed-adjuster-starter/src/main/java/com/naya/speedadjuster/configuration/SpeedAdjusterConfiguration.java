@@ -3,6 +3,7 @@ package com.naya.speedadjuster.configuration;
 import com.naya.speedadjuster.AdjustmentProperties;
 import com.naya.speedadjuster.services.LetterRequesterService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -10,10 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 /**
  * @author Evgeny Borisov
@@ -36,16 +34,24 @@ public class SpeedAdjusterConfiguration {
     }
 
     @Bean
-    public ThreadPoolExecutor letterProcessorExecutor(AdjustmentProperties adjustmentProperties) {
+    @ConditionalOnMissingBean
+    RejectedExecutionHandler rejectedExecutionHandler() {
+        return (r, executor) -> log.info("task failed — {}", r);
+    }
+
+    @Bean
+    public ThreadPoolExecutor letterProcessorExecutor(
+            AdjustmentProperties adjustmentProperties,
+            RejectedExecutionHandler rejectedExecutionHandler
+    ) {
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
                 adjustmentProperties.getLetterProcessorConcurrencyLevel(),
                 adjustmentProperties.getLetterProcessorConcurrencyLevel(),
                 0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(10));
+                new LinkedBlockingQueue<>(adjustmentProperties.getLetterBoxSize()));
 
-        threadPoolExecutor.setRejectedExecutionHandler((r, executor) -> {
-            log.info("task failed — {}", r);
-        });
+        threadPoolExecutor.setRejectedExecutionHandler(rejectedExecutionHandler);
+
         threadPoolExecutor.prestartAllCoreThreads();
         return threadPoolExecutor;
     }

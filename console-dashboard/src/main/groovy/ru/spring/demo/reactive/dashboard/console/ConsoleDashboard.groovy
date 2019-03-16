@@ -44,11 +44,11 @@ class ConsoleDashboard {
 
             builder.append("┏${('━' * PAD * 3)}┓\n")
 
-            statuses.each {status ->
-                builder.append "┃" +
-                        "${ansi().fgBrightGreen().a(status.getComponent()).fgCyan().toString().padRight(PAD * 2, '.')}" +
-                        "${ansi().fgBrightCyan().format('%.2f', status.getLetterRps()).reset().toString().padLeft(PAD * 2 - 2, '.')}" +
-                        "┃\n"
+            statuses.each { status ->
+                builder.append '┃'
+                builder.append formatComponent(status)
+                builder.append "${formatRate(status)} ${formatBuffer(status)}".padLeft(PAD * 2 - 8, '.')
+                builder.append '┃\n'
             }
 
             builder.append("┗${('━' * PAD * 3)}┛\n")

@@ -41,11 +41,6 @@ public class RatesMetricsEndpoint {
         return extractRatesFromMeters();
     }
 
-    @PostConstruct
-    public void init() {
-        log.info("letterProcessorExecutor = " + letterProcessorExecutor.orElse(null));
-    }
-
     @ReadOperation
     public Map<String, Object> rates(@Selector String arg0) {
         Map<String, Object> rates = extractMeterRates(

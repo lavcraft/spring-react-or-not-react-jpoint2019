@@ -2,6 +2,7 @@ package com.naya.gameofthrones.signuterdecoderinformer.controllers;
 
 import com.naya.gameofthrones.signuterdecoderinformer.model.DecodedLetter;
 import com.naya.gameofthrones.signuterdecoderinformer.model.Letter;
+import com.naya.gameofthrones.signuterdecoderinformer.services.GuardService;
 import com.naya.gameofthrones.signuterdecoderinformer.services.LetterDecoder;
 import com.naya.speedadjuster.services.LetterRequesterService;
 import io.micrometer.core.instrument.Counter;
@@ -24,13 +25,16 @@ import javax.annotation.PostConstruct;
 public class LetterReceiverController {
     private final LetterDecoder          decoder;
     private final LetterRequesterService letterRequesterService;
+    private       GuardService           guardService;
     private final Counter                counter;
 
     public LetterReceiverController(LetterDecoder decoder,
                                     LetterRequesterService letterRequesterService,
+                                    GuardService guardService,
                                     MeterRegistry meterRegistry) {
         this.decoder = decoder;
         this.letterRequesterService = letterRequesterService;
+        this.guardService = guardService;
         this.counter = meterRegistry.counter("letter.rps");
     }
 
@@ -44,6 +48,7 @@ public class LetterReceiverController {
     public void processLetter(@RequestBody Letter letter) throws InterruptedException {
         DecodedLetter decode = decoder.decode(letter);
         counter.increment();
+        guardService.send(decode);
         letterRequesterService.request(1);
     }
 }
