@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 @Data
 @Accessors(chain = true)
 @NoArgsConstructor
@@ -19,4 +21,14 @@ public class RateStatus {
 
     @JsonProperty("buffer.capacity")
     private int bufferCapacity;
+
+    private List<BufferStatus> buffers;
+
+    @Data
+    public static class BufferStatus {
+        private int remaining;
+        private int maxSize;
+        private int activeWorker;
+        private int workersCount;
+    }
 }

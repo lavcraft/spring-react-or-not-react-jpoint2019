@@ -2,5 +2,6 @@ apply plugin: 'groovy'
 apply plugin: 'org.springframework.boot'
 
 dependencies {
+    implementation 'org.codehaus.groovy:groovy-all'
     runtimeClasspath 'org.springframework.boot:spring-boot-devtools'
 }

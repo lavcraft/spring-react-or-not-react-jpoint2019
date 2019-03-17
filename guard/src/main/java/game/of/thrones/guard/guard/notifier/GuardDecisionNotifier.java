@@ -2,6 +2,7 @@ package game.of.thrones.guard.guard.notifier;
 
 import game.of.thrones.guard.guard.model.Notification;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -10,10 +11,9 @@ import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Service("Status")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class GuardDecisionNotifier implements Notifier {
-
-    RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     @Override
     public void sendNotification(Notification notification) {

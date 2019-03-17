@@ -3,6 +3,7 @@ package com.naya.speedadjuster.configuration;
 import com.naya.speedadjuster.AdjustmentProperties;
 import com.naya.speedadjuster.services.LetterRequesterService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -48,7 +49,13 @@ public class SpeedAdjusterConfiguration {
                 adjustmentProperties.getLetterProcessorConcurrencyLevel(),
                 adjustmentProperties.getLetterProcessorConcurrencyLevel(),
                 0L, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(adjustmentProperties.getLetterBoxSize()));
+                new LinkedBlockingQueue<>(adjustmentProperties.getLetterBoxSize()),
+                new BasicThreadFactory.Builder()
+                        .namingPattern("letter-%d")
+                        .daemon(true)
+                        .priority(Thread.MAX_PRIORITY)
+                        .build()
+        );
 
         threadPoolExecutor.setRejectedExecutionHandler(rejectedExecutionHandler);
 

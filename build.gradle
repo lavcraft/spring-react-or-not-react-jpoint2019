@@ -69,7 +69,6 @@ subprojects {
                 'io.dropwizard.metrics:metrics-core',
                 'org.beryx:text-io',
                 'org.beryx:text-io-web',
-                'org.codehaus.groovy:groovy-all',
                 'org.fusesource.jansi:jansi'
 
         testImplementation 'org.mockito:mockito-core',

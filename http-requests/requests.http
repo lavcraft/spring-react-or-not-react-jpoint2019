@@ -1,22 +1,41 @@
 # remaning requests in producer
 GET {{letter-grabber-host}}/request
 Accept: application/json
+
+> {%
+    client.test("Should return remaining requests count", function() {
+        client.assert(response.status === 200, "Response status is not 200");
+
+        client.global.set("requests_for_clean", -1*response.body);
+    });
+ %}
+
 ###
 
 # send X request to consumer
-GET {{letter-grabber-host}}/request/10
+GET {{letter-grabber-host}}/request/1000
 Accept: application/json
+
+###
+
+# clean requests queue
+GET {{letter-grabber-host}}/request/{{requests_for_clean}}
+Accept: application/json
+
 ###
 
 # show metrics
 GET {{letter-grabber-host}}/actuator/rates
 Accept: application/json
+
 ###
 
 GET {{letter-signature-decoder-host}}/actuator/rates
 Accept: application/json
+
 ###
 
 GET {{guard-host}}/actuator/rates
 Accept: application/json
+
 ###

@@ -11,10 +11,12 @@ import ru.spring.demo.reactive.dashboard.console.model.RateStatus
 import ru.spring.demo.reactive.dashboard.console.service.FetchRatesService
 
 import javax.annotation.PostConstruct
+import java.awt.Color
 import java.util.concurrent.CompletableFuture
 
 import static java.lang.String.format
 import static java.util.concurrent.CompletableFuture.allOf
+import static org.fusesource.jansi.Ansi.Color.*
 import static org.fusesource.jansi.Ansi.ansi
 
 @Slf4j
@@ -37,48 +39,62 @@ class ConsoleDashboard {
 
         def builder = new StringBuilder()
         whenDone.thenAccept { statuses ->
+            int COL0_MAXSIZE = statuses*.component*.size().max()
+            int TABLE_LINESIZE = PAD * 2 + COL0_MAXSIZE
+
             ansi().restoreCursorPosition()
-            (statuses.size() + 2).times {
+
+            (statuses.size() + 3).times {
                 builder.append ansi().cursorUpLine().eraseLine()
             }
 
-            builder.append("┏${('━' * PAD * 3)}┓\n")
+            builder.append("┏${('━' * TABLE_LINESIZE)}┓\n")
+            builder.append '┃'
+            builder.append ansi().fgBright(BLACK)
+            builder.append 'service name'.padRight(COL0_MAXSIZE + 2)
+            builder.append 'speed'.center(8)
+            builder.append 'buffers'.center(12)
+            builder.append 'workers'.center(4)
+            builder.append ' '.padLeft(11)
+            builder.append ansi().reset()
+            builder.append '┃\n'
 
             statuses.each { status ->
                 builder.append '┃'
-                builder.append formatComponent(status)
+                builder.append formatComponent(status, COL0_MAXSIZE)
                 builder.append "${formatRate(status)} ${formatBuffer(status)}".padLeft(PAD * 2 - 8, '.')
-                builder.append '┃\n'
+                builder.append '┃\n'.padLeft(PAD - 5)
             }
 
-            builder.append("┗${('━' * PAD * 3)}┛\n")
+            builder.append("┗${('━' * TABLE_LINESIZE)}┛\n")
 
             print builder
         }
     }
 
     private String formatBuffer(RateStatus status) {
-        def size = status.getBufferSize()
-        def capacity = status.getBufferCapacity()
+        def buffer = status.buffers?.get(0)
+        return buffer?.with {
+            def result = ansi()
 
+            if (remaining <= maxSize * 0.75) {
+                result.fgBrightRed()
+            } else {
+                result.fgBrightGreen()
+            }
 
-        def result = ansi()
-
-        if (size <= capacity * 0.75) {
-            result.fgBrightRed()
-        } else {
-            result.fgBrightGreen()
-        }
-
-        result.format('%6d/%-6d', size, capacity).reset().toString()
+            result.format('%6d/%-6d', remaining, maxSize)
+            result.format('%2d/%-2d', activeWorker, workersCount)
+            return result.reset().toString()
+        } ?: format('%6d/%-6d%2d/%-2d', 0, 0, 0, 0)
     }
 
     private String formatRate(RateStatus status) {
         ansi().fgBrightCyan().format('%6.2f', status.getLetterRps()).reset().toString()
     }
 
-    private String formatComponent(RateStatus status) {
-        ansi().fgBrightGreen().a(status.getComponent().padRight(PAD * 2, '.')).reset().toString()
+    private String formatComponent(RateStatus status, int colSize) {
+        ansi().fgBrightGreen().a(status.getComponent().padRight(colSize + 2, '.')).reset().toString()
     }
 
     static CompletableFuture<List<RateStatus>> sequence(List<CompletableFuture<RateStatus>> futures) {

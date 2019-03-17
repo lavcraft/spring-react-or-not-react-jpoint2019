@@ -33,7 +33,7 @@ public class LetterDistributorImpl implements LetterDistributor {
         this.counter = meterRegistry.counter("letterRps");
     }
 
-    @Scheduled(fixedRate = 10)
+    @Scheduled(fixedDelay = 500)
     public void send() {
         while (true) {
             try {
