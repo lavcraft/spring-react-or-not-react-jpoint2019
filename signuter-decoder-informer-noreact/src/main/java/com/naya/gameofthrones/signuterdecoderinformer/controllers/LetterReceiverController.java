@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author Evgeny Borisov
@@ -23,19 +25,24 @@ import javax.annotation.PostConstruct;
 @RestController
 @RequestMapping("/analyse/letter")
 public class LetterReceiverController {
-    private final LetterDecoder          decoder;
-    private final LetterRequesterService letterRequesterService;
-    private       GuardService           guardService;
-    private final Counter                counter;
+    private final LetterDecoder           decoder;
+    private final LetterRequesterService  letterRequesterService;
+    private final BlockingQueue<Runnable> workingQueue;
+    private final ThreadPoolExecutor      letterProcessorExecutor;
+    private final GuardService            guardService;
+    private final Counter                 counter;
 
     public LetterReceiverController(LetterDecoder decoder,
                                     LetterRequesterService letterRequesterService,
                                     GuardService guardService,
-                                    MeterRegistry meterRegistry) {
+                                    MeterRegistry meterRegistry,
+                                    ThreadPoolExecutor letterProcessorExecutor) {
         this.decoder = decoder;
         this.letterRequesterService = letterRequesterService;
         this.guardService = guardService;
         this.counter = meterRegistry.counter("letter.rps");
+        this.workingQueue = letterProcessorExecutor.getQueue();
+        this.letterProcessorExecutor = letterProcessorExecutor;
     }
 
     @PostConstruct
@@ -45,10 +52,13 @@ public class LetterReceiverController {
 
     @PostMapping
     @Async("letterProcessorExecutor")
-    public void processLetter(@RequestBody Letter letter) throws InterruptedException {
+    public void processLetter(@RequestBody Letter letter) {
         DecodedLetter decode = decoder.decode(letter);
         counter.increment();
         guardService.send(decode);
-        letterRequesterService.request(1);
+
+        if(workingQueue.size() == 0) {
+            letterRequesterService.request(letterProcessorExecutor.getMaximumPoolSize());
+        }
     }
 }

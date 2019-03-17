@@ -2,7 +2,7 @@ server.port: 8082
 
 datasender:
   letter-box-size: 10
-  letter-processor-concurrency-level: 5
+  letter-processor-concurrency-level: 8
 
 management:
   endpoints:
