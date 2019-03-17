@@ -12,13 +12,12 @@ import org.springframework.boot.actuate.endpoint.annotation.Selector;
 import org.springframework.core.codec.StringDecoder;
 
 import javax.annotation.PostConstruct;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Map.entry;
@@ -33,8 +32,8 @@ public class RatesMetricsEndpoint {
             (o, o2) -> o
     );
 
-    private @Autowired MetricRegistry metricRegistry;
-    private @Autowired Optional<ThreadPoolExecutor> letterProcessorExecutor;
+    private @Autowired MetricRegistry                     metricRegistry;
+    private @Autowired Optional<List<ThreadPoolExecutor>> letterProcessorExecutor;
 
     @ReadOperation
     public Map<String, Object> allrates() {
@@ -48,10 +47,7 @@ public class RatesMetricsEndpoint {
                         .filter(stringMeterEntry -> stringMeterEntry.getKey().contains(arg0))
         );
 
-        rates.putAll(letterProcessorExecutor
-                .map(this::extractThreadPoolStats)
-                .orElse(Collections.emptyMap())
-        );
+        rates.putAll(extractPoolStats());
 
         return rates;
     }
@@ -59,12 +55,21 @@ public class RatesMetricsEndpoint {
     private Map<String, Object> extractRatesFromMeters() {
         Map<String, Object> rates = extractMeterRates(metricRegistry.getMeters().entrySet().stream());
 
-        rates.putAll(letterProcessorExecutor
-                .map(this::extractThreadPoolStats)
-                .orElse(Collections.emptyMap())
-        );
+        rates.putAll(extractPoolStats());
 
         return rates;
+    }
+
+    private Map<String, Object> extractPoolStats() {
+        return letterProcessorExecutor
+                .map(Collection::stream)
+                .map(threadPoolExecutorStream -> threadPoolExecutorStream.map(this::extractThreadPoolStats))
+                .map(mapStream -> mapStream
+                        .map(Map::entrySet)
+                        .flatMap(Collection::stream)
+                        .collect(ENTRY_MAP_COLLECTOR)
+                )
+                .orElse(Collections.emptyMap());
     }
 
     private Map<String, Object> extractMeterRates(Stream<Entry<String, Meter>> stream) {

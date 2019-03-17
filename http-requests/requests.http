@@ -1,0 +1,22 @@
+# remaning requests in producer
+GET {{letter-grabber-host}}/request
+Accept: application/json
+###
+
+# send X request to consumer
+GET {{letter-grabber-host}}/request/10
+Accept: application/json
+###
+
+# show metrics
+GET {{letter-grabber-host}}/actuator/rates
+Accept: application/json
+###
+
+GET {{letter-signature-decoder-host}}/actuator/rates
+Accept: application/json
+###
+
+GET {{guard-host}}/actuator/rates
+Accept: application/json
+###

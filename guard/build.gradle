@@ -5,5 +5,7 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-actuator',
             project(':speed-adjuster-starter'),
             project(':metrics-starter')
+
+    runtimeClasspath 'org.springframework.boot:spring-boot-devtools'
 }
 

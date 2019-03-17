@@ -1,9 +1,10 @@
 rootProject.name = 'spring-reactive-in-practice'
 
-include 'letter-grabber'
-include 'speed-adjuster-starter'
-include 'metrics-starter'
-include 'signuter-decoder-informer-noreact'
-include 'console-dashboard'
-include 'guard'
-
+fileTree('.') {
+    include '**/build.gradle'
+    exclude 'build.gradle'
+}.collect {
+    relativePath(it.parent).replace(File.separator, ':')
+}.each {
+    include it
+}

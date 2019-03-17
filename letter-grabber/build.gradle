@@ -6,4 +6,6 @@ dependencies {
             'org.springframework.boot:spring-boot-starter-actuator',
             'com.github.javafaker:javafaker',
             project(':metrics-starter')
+
+    runtimeClasspath 'org.springframework.boot:spring-boot-devtools'
 }
