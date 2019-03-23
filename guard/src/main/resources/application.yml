@@ -2,10 +2,14 @@ server.port: 8082
 
 datasender:
   letter-box-size: 10
-  letter-processor-concurrency-level: 8
+  letter-processor-concurrency-level: 2
+  url: http://localhost:8081/request
 
 management:
   endpoints:
     web:
       exposure:
         include: '*'
+logging:
+  level:
+    org.springframework.boot.devtools.autoconfigure: DEBUG

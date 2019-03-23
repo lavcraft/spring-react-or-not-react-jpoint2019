@@ -1,10 +1,7 @@
 apply plugin: 'org.springframework.boot'
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web',
-            'org.springframework.boot:spring-boot-starter-aop',
-            'org.springframework.boot:spring-boot-starter-actuator',
-            'com.github.javafaker:javafaker',
+    implementation 'com.github.javafaker:javafaker',
             project(':metrics-starter')
 
     runtimeClasspath 'org.springframework.boot:spring-boot-devtools'

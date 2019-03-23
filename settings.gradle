@@ -1,4 +1,4 @@
-rootProject.name = 'spring-reactive-in-practice'
+rootProject.name = 'spring-react-or-not-react'
 
 fileTree('.') {
     include '**/build.gradle'

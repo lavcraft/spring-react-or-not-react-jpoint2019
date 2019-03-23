@@ -8,9 +8,13 @@ server:
 logging:
   level:
     root: info
-#    com.naya.gameofthrones.signuterdecoderinformer.controllers: OFF
 management:
   endpoints:
     web:
       exposure:
         include: '*'
+
+spring:
+  devtools:
+    livereload:
+      port: 10501

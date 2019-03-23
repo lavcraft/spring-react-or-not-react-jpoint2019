@@ -13,6 +13,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class SpeedAdjusterController {
     private final AdjustmentProperties adjustmentProperties;
 
+    @GetMapping("/request/{request}")
+    public int request(@PathVariable int request) {
+        return adjustmentProperties.getRequest().addAndGet(request);
+    }
+
+    @GetMapping("/request")
+    public int getAtomicInteger() {
+        return adjustmentProperties.getRequest().get();
+    }
+
     @GetMapping("/speed/{level}")
     public String setSpeed(@PathVariable int level) {
         adjustmentProperties.setSlowMultiplier(level);

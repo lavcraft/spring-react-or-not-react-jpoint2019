@@ -5,10 +5,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class GuardService {
@@ -20,7 +23,11 @@ public class GuardService {
                 .setLetterId(decodedLetter.getAuthor())
                 .setMessage(decodedLetter.getContent());
 
-        restTemplate.postForObject("http://localhost:8082/guard", request, Void.class);
+        try {
+            restTemplate.postForObject("http://localhost:8082/guard", request, Void.class);
+        } catch (RestClientException e) {
+            log.error("cant send message to guard service error", e);
+        }
     }
 
     @Data

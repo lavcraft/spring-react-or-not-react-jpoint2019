@@ -20,6 +20,7 @@ public class ConsoleDashboardApplication {
     public static void main(String[] args) {
         System.setProperty("jansi.passthrough", "true");
         new SpringApplicationBuilder(ConsoleDashboardApplication.class)
+                .headless(true)
                 .web(WebApplicationType.NONE)
                 .bannerMode(Banner.Mode.OFF)
                 .run(args);
