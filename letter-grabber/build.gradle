@@ -2,6 +2,7 @@ apply plugin: 'org.springframework.boot'
 
 dependencies {
     implementation 'com.github.javafaker:javafaker',
+            project(':speed-adjuster-starter')
             project(':metrics-starter')
 
     runtimeClasspath 'org.springframework.boot:spring-boot-devtools'

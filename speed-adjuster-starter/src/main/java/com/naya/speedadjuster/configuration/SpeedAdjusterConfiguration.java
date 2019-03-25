@@ -24,6 +24,7 @@ import java.util.concurrent.*;
 public class SpeedAdjusterConfiguration {
 
     @Bean
+    @ConditionalOnMissingBean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
         return builder.build();
     }

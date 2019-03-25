@@ -4,40 +4,74 @@ import com.naya.gameofthrones.lettergrabber.model.Letter;
 import com.naya.gameofthrones.lettergrabber.producer.LetterProducer;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.springframework.http.MediaType.APPLICATION_STREAM_JSON;
 
 /**
  * @author Evgeny Borisov
  */
 @Slf4j
+@Getter
 @Service
 public class LetterDistributorImpl implements LetterDistributor {
     private final LetterProducer producer;
     private final LetterSender   sender;
 
-    private final AtomicInteger atomicInteger = new AtomicInteger(0);
-    private final Counter counter;
+    private final AtomicInteger      atomicInteger = new AtomicInteger(0);
+    private final Counter            counter;
+    private final WebClient.Builder  webClientBuilder;
+    private final ThreadPoolExecutor letterProcessorExecutor;
 
     public LetterDistributorImpl(LetterProducer producer,
                                  LetterSender sender,
-                                 MeterRegistry meterRegistry) {
+                                 MeterRegistry meterRegistry,
+                                 WebClient.Builder webClientBuilder,
+                                 ThreadPoolExecutor letterProcessorExecutor) {
         this.producer = producer;
         this.sender = sender;
         this.counter = meterRegistry.counter("letterRps");
+        this.webClientBuilder = webClientBuilder;
+        this.letterProcessorExecutor = letterProcessorExecutor;
     }
 
-    @Scheduled(fixedDelay = 500)
+    @EventListener(ApplicationStartedEvent.class)
+    public void init() {
+        webClientBuilder.baseUrl("http://localhost:8081/").build()
+                .post().uri("/analyse/letter")
+                .contentType(APPLICATION_STREAM_JSON)
+                .accept(APPLICATION_STREAM_JSON)
+                .body(
+                        producer.letterFlux()
+                                .onBackpressureDrop(o -> log.info("Drop {}", o)),
+                        Letter.class
+                )
+                .exchange()
+                .onErrorContinue((throwable, o) -> log.error("Error, try reconnect", throwable))
+                .retry()
+                .subscribe(aVoid -> log.info("aVoid = " + aVoid));
+    }
+
+    //    @Scheduled(fixedDelay = 500)
     public void send() {
         while (true) {
             try {
-                if (atomicInteger.get() > 0) {
+                if(atomicInteger.get() > 0) {
                     distribute();
                     counter.increment();
                 }
@@ -57,7 +91,7 @@ public class LetterDistributorImpl implements LetterDistributor {
     public void distribute() {
         Letter letter = producer.getLetter();
         //TODO add letter per seconds indicator
-        sender.send(letter);
+//        sender.send(letter);
         atomicInteger.getAndDecrement();
     }
 

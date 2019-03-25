@@ -63,7 +63,7 @@ subprojects {
             testAnnotationProcessor it
         }
 
-        implementation 'org.springframework.boot:spring-boot-starter-web',
+        implementation 'org.springframework.boot:spring-boot-starter-webflux',
                 'org.springframework.boot:spring-boot-starter-actuator',
                 'com.google.guava:guava',
                 'io.dropwizard.metrics:metrics-core',

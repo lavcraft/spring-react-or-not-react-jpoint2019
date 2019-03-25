@@ -13,11 +13,5 @@ public class LetterGrabberApplication {
     public static void main(String[] args) {
         SpringApplication.run(LetterGrabberApplication.class, args);
     }
-
-    @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder builder) {
-        return builder.build();
-    }
-
 }
 
