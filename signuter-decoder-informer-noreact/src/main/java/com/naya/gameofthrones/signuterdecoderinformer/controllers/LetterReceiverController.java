@@ -9,16 +9,17 @@ import com.naya.speedadjuster.services.LetterRequesterService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
+import org.reactivestreams.Subscription;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.UnicastProcessor;
 import reactor.core.scheduler.Schedulers;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -63,21 +64,30 @@ public class LetterReceiverController {
         }
     }
 
-//    @Async("letterProcessorExecutor")
+    //    @Async("letterProcessorExecutor")
     @PostMapping(consumes = APPLICATION_STREAM_JSON_VALUE)
-    public Flux<DecodedLetter> processLetter(@RequestBody Flux<Letter> letterFlux) {
-        return letterFlux
-                .onBackpressureDrop(droppedLetter -> log.info("Drop letter {}", droppedLetter.getContent()))
-                .subscribeOn(Schedulers.fromExecutor(letterProcessorExecutor))
-                .flatMap(letter -> Mono.just(decoder.decode(letter)))
-                .doOnNext(decodedLetter -> log.info("Decoded letter {}", decodedLetter));
+    public Mono<Void> processLetter(@RequestBody Flux<Letter> letterFlux) {
+        int prefetch = letterFlux.getPrefetch();
+        letterFlux
+                .onBackpressureDrop(droppedLetter -> log.info("Drop letter {}", droppedLetter))
+                .doOnRequest(value -> {
+                    //request.send
+                })
+                .parallel(letterProcessorExecutor.getMaximumPoolSize()+1)
+                .runOn(Schedulers.fromExecutor(letterProcessorExecutor))
+                .subscribe(letter -> {
+                    DecodedLetter decodedLetter = decoder.decode(letter);
+                    log.info("Decoded letter {}", decodedLetter);
+                    guardService.send(decodedLetter);
+                });
+//                .publish(workerFlux -> letterFlux
+//                        .parallel(letterProcessorExecutor.getMaximumPoolSize())
+//                        .runOn(Schedulers.fromExecutor(letterProcessorExecutor))
+//                        .map(letter -> decoder.decode(letter))
+//                        .doOnNext(decodedLetter -> log.info("Decoded letter {}", decodedLetter)));
+//                .then();
 
-//        .subscribe(new BaseSubscriber<DecodedLetter>() {
-//            @Override
-//            protected void hookOnNext(DecodedLetter value) {
-//                log.info("value = " + value);
-//            }
-//        });
+        return Mono.never();
 
 //        DecodedLetter decode = decoder.decode(letter);
 //        counter.increment();

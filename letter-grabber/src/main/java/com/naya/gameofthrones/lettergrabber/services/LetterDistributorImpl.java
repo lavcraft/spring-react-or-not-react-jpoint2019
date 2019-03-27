@@ -17,6 +17,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
+import java.time.Duration;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -58,12 +59,15 @@ public class LetterDistributorImpl implements LetterDistributor {
                 .accept(APPLICATION_STREAM_JSON)
                 .body(
                         producer.letterFlux()
-                                .onBackpressureDrop(o -> log.info("Drop {}", o)),
+                                .doOnRequest(value -> log.info("request {}", value))
+                                .onBackpressureDrop(o -> log.info("Drop {}", o))
+                                .doOnNext(letter -> log.debug("produce letter {}", letter)),
                         Letter.class
                 )
                 .exchange()
-                .onErrorContinue((throwable, o) -> log.error("Error, try reconnect", throwable))
-                .retry()
+                .doOnNext(clientResponse -> log.info("response {}", clientResponse.statusCode()))
+                .doOnError(throwable -> log.error("Sth went wrong {}", throwable.getMessage()))
+                .retryBackoff(Long.MAX_VALUE, Duration.ofMillis(500))
                 .subscribe(aVoid -> log.info("aVoid = " + aVoid));
     }
 
