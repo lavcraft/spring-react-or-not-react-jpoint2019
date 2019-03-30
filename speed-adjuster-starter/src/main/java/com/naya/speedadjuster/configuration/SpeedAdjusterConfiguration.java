@@ -1,6 +1,8 @@
 package com.naya.speedadjuster.configuration;
 
 import com.naya.speedadjuster.AdjustmentProperties;
+import com.naya.speedadjuster.controllers.RequestController;
+import com.naya.speedadjuster.mode.Letter;
 import com.naya.speedadjuster.services.LetterRequesterService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -11,7 +13,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
+import reactor.core.publisher.EmitterProcessor;
+import reactor.core.publisher.UnicastProcessor;
 
+import java.util.Optional;
 import java.util.concurrent.*;
 
 /**
@@ -22,6 +27,12 @@ import java.util.concurrent.*;
 @EnableScheduling
 @EnableConfigurationProperties(AdjustmentProperties.class)
 public class SpeedAdjusterConfiguration {
+
+    @Bean
+    public RequestController requestController(AdjustmentProperties properties,
+                                               Optional<EmitterProcessor<Long>> lettersProcessor) {
+        return new RequestController(properties, lettersProcessor);
+    }
 
     @Bean
     @ConditionalOnMissingBean

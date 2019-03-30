@@ -29,7 +29,7 @@ class ConsoleDashboard {
     @Autowired FetchRatesService   fetchRatesService
     @Autowired DashboardProperties properties
 
-    @Scheduled(fixedDelay = 50L)
+    @Scheduled(fixedDelay = 100L)
     void run() {
         def whenDone = sequence([
                 fetchRatesService.getRateStatus(properties.getLetterGrabberUrl()).thenApply({ status -> status.setComponent("letter-grabber-producer") }),

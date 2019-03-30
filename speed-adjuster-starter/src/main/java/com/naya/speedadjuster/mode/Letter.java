@@ -1,4 +1,4 @@
-package com.naya.gameofthrones.signuterdecoderinformer.model;
+package com.naya.speedadjuster.mode;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

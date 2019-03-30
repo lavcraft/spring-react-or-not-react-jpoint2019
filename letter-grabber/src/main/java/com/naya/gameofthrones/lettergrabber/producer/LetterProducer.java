@@ -1,10 +1,7 @@
 package com.naya.gameofthrones.lettergrabber.producer;
 
-import com.naya.gameofthrones.lettergrabber.model.Letter;
-import lombok.SneakyThrows;
+import com.naya.speedadjuster.mode.Letter;
 import reactor.core.publisher.Flux;
-
-import java.util.List;
 
 /**
  * @author Evgeny Borisov

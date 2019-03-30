@@ -7,6 +7,17 @@
 1. [v] пририсовать буферы на console-dashboard
 2. [v] guard который дропает реквесты
 3. начать переписывать с spring-react (webflux + tcp backpressure)
-...
+    1. Напороться на doNext
+    2. Переписать на subscriber
+    3. Напороться
 4. сдедать свою реализацию Observable с request(n) таким же как на шаге 2
 5. переписать реализацию на честный backpressure c RSocket
+
+     --- b
+a ---|
+     --- c
+
+6. Reactor - Netty просит по 32 элемента. У него своц BP между "нетворком" и "клиентом"
+7. reactor-extra и более адекватный backoff стратегия
+
+8. RSocket — resumability показать
