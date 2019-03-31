@@ -53,7 +53,7 @@ public class LetterReceiverController {
         guardRemainingRequest = adjustmentProperties.getRequest();
     }
 
-    @Scheduled(fixedDelay = 300)
+//    @Scheduled(fixedDelay = 300)
     public void init() {
         if(workingQueue.size() == 0 && guardRemainingRequest.get() > 0) {
             letterRequesterService.request(letterProcessorExecutor.getMaximumPoolSize());
@@ -67,8 +67,9 @@ public class LetterReceiverController {
                 .onBackpressureDrop(droppedLetter -> log.info("Drop letter {}", droppedLetter))
                 .doOnRequest(value -> {
                     log.info("reqeust({})", value);
-                    letterRequesterService.request((int) value);
-                    //request.send
+                    if(workingQueue.size() == 0) {
+                        letterRequesterService.request(letterProcessorExecutor.getMaximumPoolSize());
+                    }
                 })
                 .parallel(letterProcessorExecutor.getMaximumPoolSize()+1)
                 .runOn(Schedulers.fromExecutor(letterProcessorExecutor))

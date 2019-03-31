@@ -53,70 +53,43 @@ public class LetterProducerFake implements LetterProducer {
     public Flux<Letter> letterFlux() {
         return Flux.<Letter>generate(synchronousSink -> synchronousSink.next(randomLetter()))
                 .doOnRequest(value -> log.info("from consumer {}", value))
-                .transform(letterFlux -> {
-                    return new Flux<Letter>() {
+                .transform(Operators.<Letter, Letter>liftPublisher((ignore, downstream) -> new BaseSubscriber<Letter>() { //remove letter and discuss about compiler bug. Or not bug, its a question
+                            @Override
+                            protected void hookOnSubscribe(Subscription subscription) {
+                                EmitterProcessor<Long> ifAvailable = unicastProcessor.getIfAvailable();
+                                if(ifAvailable != null) {
+                                    ifAvailable.subscribe(subscription::request);
+                                }
 
-                        @Override
-                        public void subscribe(CoreSubscriber<? super Letter> downstream) {
-                            letterFlux.subscribe(
-                                    new BaseSubscriber<Letter>() {
-                                        @Override
-                                        protected void hookOnSubscribe(Subscription subscription) {
-                                            EmitterProcessor<Long> ifAvailable = unicastProcessor.getIfAvailable();
-                                            if(ifAvailable != null) {
-                                                ifAvailable
-                                                        .publishOn(Schedulers.parallel())
-                                                        .subscribe(subscription::request);
-                                            }
+                                downstream.onSubscribe(new Subscription() {
+                                    @Override
+                                    public void request(long n) {
+                                        log.info("from network request {} ", n);
+                                    }
 
-                                            downstream.onSubscribe(new Subscription() {
-                                                @Override
-                                                public void request(long n) {
-                                                    log.info("from network request {} ", n);
-                                                }
+                                    @Override
+                                    public void cancel() {
+                                        subscription.cancel();
+                                    }
+                                });
+                            }
 
-                                                @Override
-                                                public void cancel() {
-                                                    subscription.cancel();
-                                                }
-                                            });
-                                        }
+                            @Override
+                            protected void hookOnNext(Letter value) {
+                                downstream.onNext(value);
+                            }
 
-                                        @Override
-                                        protected void hookOnNext(Letter value) {
-                                            downstream.onNext(value);
-                                        }
+                            @Override
+                            protected void hookOnComplete() {
+                                downstream.onComplete();
+                            }
 
-                                        @Override
-                                        protected void hookOnComplete() {
-                                            downstream.onComplete();
-                                        }
-
-                                        @Override
-                                        protected void hookOnError(Throwable throwable) {
-                                            downstream.onError(throwable);
-                                        }
-
-                                        @Override
-                                        protected void hookOnCancel() {
-                                            log.info("Cancel!!");
-                                        }
-
-                                        @Override
-                                        protected void hookFinally(SignalType type) {
-                                            super.hookFinally(type);
-                                            log.info("Finally!!");
-                                        }
-                                    });
-                        }
-                    };
-                });
-
-
-//        return unicastProcessor.map(letter -> randomLetter());
-//        return Flux.interval(Duration.ofMillis(10))
-//                .publishOn(Schedulers.fromExecutor(letterProcessorExecutor))
-//                .map(aLong -> randomLetter());
+                            @Override
+                            protected void hookOnError(Throwable throwable) {
+                                downstream.onError(throwable);
+                            }
+                        })
+                );
     }
 
     private Letter randomLetter() {
