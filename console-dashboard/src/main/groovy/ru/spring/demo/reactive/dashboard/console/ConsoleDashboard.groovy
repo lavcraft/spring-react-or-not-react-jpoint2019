@@ -3,20 +3,17 @@ package ru.spring.demo.reactive.dashboard.console
 import groovy.transform.CompileStatic
 import lombok.RequiredArgsConstructor
 import lombok.extern.slf4j.Slf4j
-import org.fusesource.jansi.Ansi
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import ru.spring.demo.reactive.dashboard.console.model.RateStatus
 import ru.spring.demo.reactive.dashboard.console.service.FetchRatesService
 
-import javax.annotation.PostConstruct
-import java.awt.Color
 import java.util.concurrent.CompletableFuture
 
 import static java.lang.String.format
 import static java.util.concurrent.CompletableFuture.allOf
-import static org.fusesource.jansi.Ansi.Color.*
+import static org.fusesource.jansi.Ansi.Color.BLACK
 import static org.fusesource.jansi.Ansi.ansi
 
 @Slf4j
@@ -63,7 +60,7 @@ class ConsoleDashboard {
                 builder.append '┃'
                 builder.append formatComponent(status, COL0_MAXSIZE)
                 builder.append "${formatRate(status)} ${formatBuffer(status)}".padLeft(PAD * 2 - 8, '.')
-                builder.append '┃\n'.padLeft(PAD - 5)
+                builder.append '┃\n'.padLeft(PAD - 7)
             }
 
             builder.append("┗${('━' * TABLE_LINESIZE)}┛\n")
@@ -90,7 +87,7 @@ class ConsoleDashboard {
     }
 
     private String formatRate(RateStatus status) {
-        ansi().fgBrightCyan().format('%6.2f', status.getLetterRps()).reset().toString()
+        ansi().fgBrightCyan().format('%8.2f', status.getLetterRps()).reset().toString()
     }
 
     private String formatComponent(RateStatus status, int colSize) {
