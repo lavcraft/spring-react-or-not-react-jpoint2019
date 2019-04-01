@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -37,14 +39,23 @@ public class GuardDecider {
 
     public void decide(Notification notification) {
         letterProcessorExecutor.execute(
-                new GuardTask(
-                        notification,
-                        notifier,
-                        counter,
-                        letterRequesterService,
-                        workQueue
-                )
+                getCommand(notification)
         );
+    }
+
+    private GuardTask getCommand(Notification notification) {
+        return new GuardTask(
+                notification,
+                notifier,
+                counter,
+                letterRequesterService,
+                workQueue
+        );
+    }
+
+    public Mono<Void> decideDeferred(Notification notification) {
+        return Mono.<Void>fromRunnable(getCommand(notification))
+                .subscribeOn(Schedulers.fromExecutor(letterProcessorExecutor));
     }
 
     @Slf4j

@@ -18,4 +18,3 @@ spring:
   devtools:
     livereload:
       port: 10501
-

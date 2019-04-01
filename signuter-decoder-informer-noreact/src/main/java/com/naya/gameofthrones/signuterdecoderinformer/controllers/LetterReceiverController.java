@@ -61,7 +61,7 @@ public class LetterReceiverController {
     }
 
     //    @Async("letterProcessorExecutor")
-    @PostMapping(consumes = APPLICATION_STREAM_JSON_VALUE)
+//    @PostMapping(consumes = APPLICATION_STREAM_JSON_VALUE)
     public Mono<Void> processLetter(@RequestBody Flux<Letter> letterFlux) {
         letterFlux
                 .onBackpressureDrop(droppedLetter -> log.info("Drop letter {}", droppedLetter))

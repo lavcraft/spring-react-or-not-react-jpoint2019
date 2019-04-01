@@ -13,3 +13,8 @@ management:
 logging:
   level:
     org.springframework.boot.devtools.autoconfigure: DEBUG
+
+spring:
+  devtools:
+    livereload:
+      port: 10510
