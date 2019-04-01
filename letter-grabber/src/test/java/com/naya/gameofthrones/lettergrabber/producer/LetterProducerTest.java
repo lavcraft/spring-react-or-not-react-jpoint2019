@@ -16,7 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class LetterProducerTest {
 
     @Autowired
-    LetterProducerFake producer;
+    LetterProducer producer;
 
     @Test
     public void testProducer() {
