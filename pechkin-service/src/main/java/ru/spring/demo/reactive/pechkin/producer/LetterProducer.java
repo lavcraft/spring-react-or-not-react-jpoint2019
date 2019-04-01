@@ -1,15 +1,13 @@
 package ru.spring.demo.reactive.pechkin.producer;
 
-import com.github.javafaker.GameOfThrones;
+import com.github.javafaker.RickAndMorty;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
-import ru.spring.demo.reactive.starter.speed.mode.Letter;
+import ru.spring.demo.reactive.starter.speed.model.Letter;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -21,8 +19,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Setter
 @RequiredArgsConstructor
 public class LetterProducer {
-    private final GameOfThrones                          faker;
-    private final ObjectProvider<EmitterProcessor<Long>> unicastProcessor;
+    private final RickAndMorty faker;
 
 
     @SneakyThrows
@@ -37,10 +34,12 @@ public class LetterProducer {
     }
 
     private Letter randomLetter() {
+        String character = faker.character();
         return Letter.builder()
                 .content(faker.quote())
-                .location(faker.city())
-                .signature(faker.character())
+                .location(faker.location())
+                .signature(character)
+                ._original(character)
                 .build();
     }
 

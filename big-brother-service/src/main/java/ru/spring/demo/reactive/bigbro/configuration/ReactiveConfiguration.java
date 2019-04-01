@@ -14,9 +14,9 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.tcp.TcpClient;
-import ru.spring.demo.reactive.bigbro.model.DecodedLetter;
 import ru.spring.demo.reactive.bigbro.services.LetterDecoder;
-import ru.spring.demo.reactive.starter.speed.mode.Letter;
+import ru.spring.demo.reactive.starter.speed.model.DecodedLetter;
+import ru.spring.demo.reactive.starter.speed.model.Letter;
 
 import java.util.concurrent.ThreadPoolExecutor;
 

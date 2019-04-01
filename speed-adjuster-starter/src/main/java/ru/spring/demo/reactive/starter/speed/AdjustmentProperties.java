@@ -14,7 +14,7 @@ public class AdjustmentProperties {
     private String url;
     private int    letterBoxSize                   = 100;
     private int    letterProcessorConcurrencyLevel = 1;
-    private int    slowMultiplier                  = 1;
+    private int    processingTime                  = 500;
 
     private AtomicInteger request = new AtomicInteger(0);
 }

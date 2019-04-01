@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import ru.spring.demo.reactive.bigbro.model.DecodedLetter;
+import ru.spring.demo.reactive.starter.speed.model.DecodedLetter;
 
 @Slf4j
 @Service
@@ -26,7 +26,7 @@ public class GuardService {
         try {
             restTemplate.postForObject("http://localhost:8082/guard", request, Void.class);
         } catch (RestClientException e) {
-            log.error("cant send message to guard service error", e);
+            log.error("cant send action to guard service error", e);
         }
     }
 

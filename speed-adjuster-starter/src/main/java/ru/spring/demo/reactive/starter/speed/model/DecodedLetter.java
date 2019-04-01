@@ -1,4 +1,4 @@
-package ru.spring.demo.reactive.bigbro.model;
+package ru.spring.demo.reactive.starter.speed.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

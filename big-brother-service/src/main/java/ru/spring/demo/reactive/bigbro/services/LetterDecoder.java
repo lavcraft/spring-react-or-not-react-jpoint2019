@@ -5,12 +5,11 @@ import io.micrometer.core.instrument.MeterRegistry;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.spring.demo.reactive.bigbro.model.DecodedLetter;
 import ru.spring.demo.reactive.starter.speed.AdjustmentProperties;
-import ru.spring.demo.reactive.starter.speed.mode.Letter;
+import ru.spring.demo.reactive.starter.speed.model.DecodedLetter;
+import ru.spring.demo.reactive.starter.speed.model.Letter;
 
-import static java.lang.Math.round;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
  * @author Evgeny Borisov
@@ -29,14 +28,14 @@ public class LetterDecoder {
 
     @SneakyThrows
     public DecodedLetter decode(Letter letter) {
-        SECONDS.sleep(
-                round(adjustmentProperties.getSlowMultiplier())
+        MILLISECONDS.sleep(
+                adjustmentProperties.getProcessingTime()
         );
 
         counter.increment();
 
         return DecodedLetter.builder()
-                .author(letter.getSignature())
+                .author(letter.secretMethodForDecodeSignature())
                 .location(letter.getLocation())
                 .content(letter.getContent())
                 .build();

@@ -1,7 +1,7 @@
 package ru.spring.demo.reactive.pechkin.configuration;
 
 import com.github.javafaker.Faker;
-import com.github.javafaker.GameOfThrones;
+import com.github.javafaker.RickAndMorty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class FakeDataConfiguration {
     @Bean
-    public GameOfThrones faker(){
-        return new Faker().gameOfThrones();
+    public RickAndMorty faker() {
+        return new Faker().rickAndMorty();
     }
 }

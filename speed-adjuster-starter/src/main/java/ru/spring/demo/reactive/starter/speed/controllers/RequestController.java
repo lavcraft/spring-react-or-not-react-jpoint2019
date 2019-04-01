@@ -41,7 +41,7 @@ public class RequestController {
 
     @GetMapping("/speed/{level}")
     public String setSpeed(@PathVariable int level) {
-        adjustmentProperties.setSlowMultiplier(level);
+        adjustmentProperties.setProcessingTime(level);
 
         return "{ \"status\": \"ok\"}";
     }

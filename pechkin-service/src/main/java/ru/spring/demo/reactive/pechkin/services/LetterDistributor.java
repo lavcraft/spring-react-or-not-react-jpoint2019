@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.tcp.TcpClient;
 import ru.spring.demo.reactive.pechkin.producer.LetterProducer;
-import ru.spring.demo.reactive.starter.speed.mode.Letter;
+import ru.spring.demo.reactive.starter.speed.model.Letter;
 
 import java.util.concurrent.ThreadPoolExecutor;
 

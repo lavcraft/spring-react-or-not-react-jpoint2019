@@ -1,4 +1,4 @@
-package ru.spring.demo.reactive.smith.model;
+package ru.spring.demo.reactive.starter.speed.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Notification {
-    private String letterId;
-    private String message;
+    private String author;
+    private String action;
 }

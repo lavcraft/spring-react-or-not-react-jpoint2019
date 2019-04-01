@@ -21,17 +21,13 @@ public class LetterRequesterService {
         syncSpeed(n);
     }
 
-    public void request() {
-        syncSpeed(adjustmentProperties.getSlowMultiplier() * adjustmentProperties.getLetterProcessorConcurrencyLevel());
-    }
-
     private void syncSpeed(int n) {
         try {
             restTemplate.getForObject(
                     adjustmentProperties.getUrl() + "/" + n,
                     Void.class);
         } catch (RestClientException e) {
-            log.error("no sender url found", e);
+            log.error("cant send request(n)", e);
         }
     }
 }

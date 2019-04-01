@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import ru.spring.demo.reactive.smith.decider.GuardDecider;
-import ru.spring.demo.reactive.smith.model.Notification;
+import ru.spring.demo.reactive.starter.speed.model.DecodedLetter;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -39,8 +39,8 @@ public class ReactiveConfiguration {
     }
 
     @SneakyThrows
-    private Notification getNotification(Payload payload, ObjectMapper mapper) {
-        return mapper.readValue(payload.getData().array(), Notification.class);
+    private DecodedLetter getNotification(Payload payload, ObjectMapper mapper) {
+        return mapper.readValue(payload.getData().array(), DecodedLetter.class);
     }
 
 }

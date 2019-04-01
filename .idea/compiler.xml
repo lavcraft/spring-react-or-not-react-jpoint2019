@@ -11,16 +11,10 @@
       <module name="spring-react-or-not-react.big-brother-service.test" target="11" />
       <module name="spring-react-or-not-react.console-dashboard.main" target="11" />
       <module name="spring-react-or-not-react.console-dashboard.test" target="11" />
-      <module name="spring-react-or-not-react.guard.main" target="11" />
-      <module name="spring-react-or-not-react.guard.test" target="11" />
-      <module name="spring-react-or-not-react.letter-grabber.main" target="11" />
-      <module name="spring-react-or-not-react.letter-grabber.test" target="11" />
       <module name="spring-react-or-not-react.metrics-starter.main" target="11" />
       <module name="spring-react-or-not-react.metrics-starter.test" target="11" />
       <module name="spring-react-or-not-react.pechkin-service.main" target="11" />
       <module name="spring-react-or-not-react.pechkin-service.test" target="11" />
-      <module name="spring-react-or-not-react.signuter-decoder-informer-noreact.main" target="11" />
-      <module name="spring-react-or-not-react.signuter-decoder-informer-noreact.test" target="11" />
       <module name="spring-react-or-not-react.speed-adjuster-starter.main" target="11" />
       <module name="spring-react-or-not-react.speed-adjuster-starter.test" target="11" />
     </bytecodeTargetLevel>
