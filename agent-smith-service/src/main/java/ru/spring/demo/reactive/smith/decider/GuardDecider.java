@@ -1,0 +1,93 @@
+package ru.spring.demo.reactive.smith.decider;
+
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+import ru.spring.demo.reactive.smith.model.Notification;
+import ru.spring.demo.reactive.smith.notifier.Notifier;
+import ru.spring.demo.reactive.starter.speed.services.LetterRequesterService;
+
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
+@Slf4j
+@Service
+public class GuardDecider {
+    private final Notifier                notifier;
+    private final Counter                 counter;
+    private final ThreadPoolExecutor      letterProcessorExecutor;
+    private final LetterRequesterService  letterRequesterService;
+    private final BlockingQueue<Runnable> workQueue;
+
+    public GuardDecider(Notifier notifier,
+                        MeterRegistry meterRegistry,
+                        ThreadPoolExecutor letterProcessorExecutor,
+                        LetterRequesterService letterRequesterService) {
+        this.notifier = notifier;
+        this.letterProcessorExecutor = letterProcessorExecutor;
+        this.letterRequesterService = letterRequesterService;
+
+        counter = meterRegistry.counter("letter.rps");
+        workQueue = letterProcessorExecutor.getQueue();
+    }
+
+    public void decide(Notification notification) {
+        letterProcessorExecutor.execute(
+                getCommand(notification)
+        );
+    }
+
+    private GuardTask getCommand(Notification notification) {
+        return new GuardTask(
+                notification,
+                notifier,
+                counter,
+                letterRequesterService,
+                workQueue
+        );
+    }
+
+    public Mono<Void> decideDeferred(Notification notification) {
+        return Mono.<Void>fromRunnable(getCommand(notification))
+                .subscribeOn(Schedulers.fromExecutor(letterProcessorExecutor));
+    }
+
+    @Slf4j
+    @RequiredArgsConstructor
+    public static class GuardTask implements Runnable {
+        private final Notification            notification;
+        private final Notifier                notifier;
+        private final Counter                 counter;
+        private final LetterRequesterService  letterRequesterService;
+        private final BlockingQueue<Runnable> workQueue;
+
+        @Override
+        public void run() {
+            String message = "Author of the letter with id:" + notification.getLetterId() + " is " + getDecision();
+            notification.setMessage(message);
+            notifier.sendNotification(notification);
+            counter.increment();
+
+            if(workQueue.size() == 0) {
+                letterRequesterService.request(letterRequesterService.getAdjustmentProperties().getLetterProcessorConcurrencyLevel());
+            }
+        }
+
+        @SneakyThrows
+        private static String getDecision() {
+            TimeUnit.SECONDS.sleep(1);
+            int decision = (int) ((Math.random() * (2)) + 1);
+            if(decision == 1) {
+                return "dangerous, We send a squad of guards to you......hold him!!!";
+            } else {
+                return "not dangerous. But you can kill him just because it is Game of Thrones!";
+            }
+        }
+    }
+}
