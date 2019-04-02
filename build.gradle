@@ -66,9 +66,10 @@ subprojects {
             testAnnotationProcessor it
         }
 
-        implementation 'org.springframework.boot:spring-boot-starter-webflux',
+        implementation 'org.springframework.boot:spring-boot-starter-web',
                 'org.springframework.boot:spring-boot-starter-actuator',
                 'io.rsocket:rsocket-transport-netty',
+                'io.projectreactor:reactor-core',
                 'com.google.guava:guava',
                 'io.dropwizard.metrics:metrics-core',
                 'org.beryx:text-io',

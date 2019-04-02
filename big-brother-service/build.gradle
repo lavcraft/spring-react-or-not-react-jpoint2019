@@ -2,8 +2,8 @@ apply plugin: 'org.springframework.boot'
 
 dependencies {
     implementation project(':speed-adjuster-starter'),
-            project(':metrics-starter'),
-            'com.github.CollaborationInEncapsulation.spring-boot-rsocket:spring-boot-starter-rsocket'
+            project(':metrics-starter')
+//            'com.github.CollaborationInEncapsulation.spring-boot-rsocket:spring-boot-starter-rsocket'
 
     runtimeClasspath 'org.springframework.boot:spring-boot-devtools'
 }

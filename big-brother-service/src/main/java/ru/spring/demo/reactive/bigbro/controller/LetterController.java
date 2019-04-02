@@ -61,30 +61,28 @@ public class LetterController {
 
     //    @Async("letterProcessorExecutor")
     @PostMapping(consumes = MediaType.APPLICATION_STREAM_JSON_VALUE)
-    public Mono<Void> processLetter(@RequestBody Flux<Letter> letterFlux) {
-        int parallelism = letterProcessorExecutor.getMaximumPoolSize();
-        letterFlux
-                .onBackpressureDrop(droppedLetter -> log.info("Drop letter {}", droppedLetter))
-                .doOnRequest(value -> {
-                    log.info("request({})", value);
-                    if(workingQueue.size() == 0) {
-                        letterRequesterService.request((int) value);
-                    }
-                })
-//                .parallel(parallelism, parallelism + 20)
-//                .runOn(Schedulers.fromExecutor(letterProcessorExecutor), parallelism + 20)
-                .flatMap(
-                        letter -> Mono.fromCallable(() -> decoder.decode(letter))
-                                .subscribeOn(Schedulers.fromExecutor(letterProcessorExecutor)),
-                        parallelism, parallelism)
-                .subscribe(letter -> {
-//                    DecodedLetter decodedLetter = decoder.decode(letter);
-                    log.info("Decoded letter {}", letter);
-                    counter.increment();
-//                    guardService.send(decodedLetter);
-                });
-
-        return Mono.never();
+    public void processLetter(@RequestBody Letter letterFlux) {
+//        int parallelism = letterProcessorExecutor.getMaximumPoolSize();
+//        letterFlux
+//                .onBackpressureDrop(droppedLetter -> log.info("Drop letter {}", droppedLetter))
+//                .doOnRequest(value -> {
+//                    log.info("request({})", value);
+//                    if(workingQueue.size() == 0) {
+//                        letterRequesterService.request((int) value);
+//                    }
+//                })
+////                .parallel(parallelism, parallelism + 20)
+////                .runOn(Schedulers.fromExecutor(letterProcessorExecutor), parallelism + 20)
+//                .flatMap(
+//                        letter -> Mono.fromCallable(() -> decoder.decode(letter))
+//                                .subscribeOn(Schedulers.fromExecutor(letterProcessorExecutor)),
+//                        parallelism, parallelism)
+//                .subscribe(letter -> {
+////                    DecodedLetter decodedLetter = decoder.decode(letter);
+//                    log.info("Decoded letter {}", letter);
+//                    counter.increment();
+////                    guardService.send(decodedLetter);
+//                });
     }
 
 }
