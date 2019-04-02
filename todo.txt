@@ -53,6 +53,7 @@ a ---|
 16. дропы с prefetch 1 почему то
 17? Вставить ссылку на реактивный хардкор олега
 18. Почему то остановилось общение при добавлении limitRate(8) в big-brother
+19. onBackpressureLatest() — как себя ведёт
 
 Lifecycle reactive stream (reactive hardcore greach)
 1. assembly. Собирается pipeline
