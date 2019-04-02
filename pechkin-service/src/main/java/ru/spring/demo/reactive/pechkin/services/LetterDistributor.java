@@ -46,7 +46,7 @@ public class LetterDistributor {
         this.objectMapper = objectMapper;
     }
 
-    @Scheduled(fixedDelay = 500)
+    @EventListener(ApplicationStartedEvent.class)
     public void init() {
         while (true) {
             try {
@@ -54,7 +54,7 @@ public class LetterDistributor {
                     distribute();
                     counter.increment();
                 } else {
-                    TimeUnit.MILLISECONDS.sleep(100);
+                    TimeUnit.MILLISECONDS.sleep(50);
                 }
             } catch (Exception e) {
                 log.error("Cannot send letter");
@@ -71,7 +71,7 @@ public class LetterDistributor {
     @SneakyThrows
     public void distribute() {
         Letter letter = producer.getLetter();
-        //TODO add letter per seconds indicator
+        log.info("letter = " + letter);
         sender.send(letter);
         adjustmentProperties.getRequest().getAndDecrement();
     }

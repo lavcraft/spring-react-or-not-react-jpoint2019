@@ -26,58 +26,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 @RequiredArgsConstructor
 public class LetterProducer {
     private final RickAndMorty                           faker;
-    private final ThreadPoolExecutor                     letterProcessorExecutor;
-    private final ObjectProvider<EmitterProcessor<Long>> unicastProcessor;
 
     @SneakyThrows
     public Letter getLetter() {
         return randomLetter();
-    }
-
-    LinkedBlockingQueue letterQueue = new LinkedBlockingQueue();
-
-    public Flux<Letter> letterFlux() {
-        return Flux.<Letter>generate(synchronousSink -> synchronousSink.next(randomLetter()))
-                .doOnRequest(value -> log.info("from consumer {}", value))
-                .transform(Operators.liftPublisher((ignore, downstream) -> new BaseSubscriber<Letter>() { //remove letter and discuss about compiler bug. Or not bug, its a question
-                            @Override
-                            protected void hookOnSubscribe(Subscription subscription) {
-                                EmitterProcessor<Long> ifAvailable = unicastProcessor.getIfAvailable();
-                                if(ifAvailable != null) {
-                                    ifAvailable.subscribe(subscription::request);
-                                }
-
-                                downstream.onSubscribe(new Subscription() {
-                                    @Override
-                                    public void request(long n) {
-                                        log.info("from network request {} ", n);
-                                    }
-
-                                    @Override
-                                    public void cancel() {
-                                        subscription.cancel();
-                                    }
-                                });
-                            }
-
-                            @Override
-                            protected void hookOnNext(Letter value) {
-                                downstream.onNext(value);
-                            }
-
-                            @Override
-                            protected void hookOnComplete() {
-                                downstream.onComplete();
-                            }
-
-                            @Override
-                            protected void hookOnError(Throwable throwable) {
-                                downstream.onError(throwable);
-                            }
-                        })
-                );
-
-//        return Flux.generate(synchronousSink -> synchronousSink.next(randomLetter()));
     }
 
     private Letter randomLetter() {
