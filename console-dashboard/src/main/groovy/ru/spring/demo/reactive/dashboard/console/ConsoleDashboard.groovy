@@ -26,7 +26,7 @@ class ConsoleDashboard {
     @Autowired FetchRatesService   fetchRatesService
     @Autowired DashboardProperties properties
 
-    @Scheduled(fixedDelay = 100L)
+    @Scheduled(fixedDelay = 50L)
     void run() {
         def whenDone = sequence([
                 fetchRatesService.getRateStatus(properties.getLetterGrabberUrl()).thenApply({ status -> status.setComponent("pechkin-service") }),
@@ -66,7 +66,7 @@ class ConsoleDashboard {
             builder.append("┗${('━' * TABLE_LINESIZE)}┛\n")
 
             print builder
-        }
+        }.join()
     }
 
     private String formatBuffer(RateStatus status) {
