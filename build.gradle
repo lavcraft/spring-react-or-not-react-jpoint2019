@@ -73,7 +73,8 @@ subprojects {
                 'io.dropwizard.metrics:metrics-core',
                 'org.beryx:text-io',
                 'org.beryx:text-io-web',
-                'org.fusesource.jansi:jansi'
+                'org.fusesource.jansi:jansi',
+                'io.projectreactor.addons:reactor-extra'
 
         testImplementation 'org.mockito:mockito-core',
                 'org.mockito:mockito-junit-jupiter',
