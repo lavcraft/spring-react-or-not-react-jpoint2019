@@ -29,9 +29,9 @@ class ConsoleDashboard {
     @Scheduled(fixedDelay = 100L)
     void run() {
         def whenDone = sequence([
-                fetchRatesService.getRateStatus(properties.getLetterGrabberUrl()).thenApply({ status -> status.setComponent("letter-grabber-producer") }),
-                fetchRatesService.getRateStatus(properties.getLetterSignatureUrl()).thenApply({ status -> status.setComponent("letter-signature-consumer") }),
-                fetchRatesService.getRateStatus(properties.getGuardUrl()).thenApply({ status -> status.setComponent("guard-consumer") })
+                fetchRatesService.getRateStatus(properties.getLetterGrabberUrl()).thenApply({ status -> status.setComponent("pechkin-service") }),
+                fetchRatesService.getRateStatus(properties.getLetterSignatureUrl()).thenApply({ status -> status.setComponent("big-brother-service") }),
+                fetchRatesService.getRateStatus(properties.getGuardUrl()).thenApply({ status -> status.setComponent("agent-smith-service") })
         ])
 
         def builder = new StringBuilder()
