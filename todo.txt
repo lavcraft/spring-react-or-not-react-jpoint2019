@@ -32,5 +32,17 @@ a ---|
 13. Сказать про то для чего нужен webflux. Что реактивность зависит от протокола
     Вопрсоы: В каких кейсах вообще стоит использовать webflux
              Есть ли смысл в демо webflux приделывать третий сервис, может ли это потенциально показать какой то профит
-             очередь backpressure и когда случается request(n). Как спрогнозировать и нарисовать модель на слайд людям
+             очередь backpressure и когда случается request(n). Как спрогнозировать и нарисовать модель на слайд людям 2/3 от prefetch
+             Что если в webflux делать .then как в rsocket? Есть ли смысл
 
+
+15. Семантически эквивалентны
+                .parallel(letterProcessorExecutor.getMaximumPoolSize() + 1)
+                .runOn(Schedulers.fromExecutor(letterProcessorExecutor))
+                .sequential()
+и
+                .flatMap(
+                        letter -> Mono.fromCallable(() -> decoder.decode(letter))
+                                .subscribeOn(Schedulers.fromExecutor(letterProcessorExecutor)),
+                        letterProcessorExecutor.getMaximumPoolSize())
+Но технически есть разница. Но тонкая :)

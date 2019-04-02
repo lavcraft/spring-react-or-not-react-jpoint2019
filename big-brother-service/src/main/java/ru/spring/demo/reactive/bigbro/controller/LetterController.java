@@ -15,7 +15,6 @@ import reactor.core.scheduler.Schedulers;
 import ru.spring.demo.reactive.bigbro.services.GuardService;
 import ru.spring.demo.reactive.bigbro.services.LetterDecoder;
 import ru.spring.demo.reactive.starter.speed.AdjustmentProperties;
-import ru.spring.demo.reactive.starter.speed.model.DecodedLetter;
 import ru.spring.demo.reactive.starter.speed.model.Letter;
 import ru.spring.demo.reactive.starter.speed.services.LetterRequesterService;
 
@@ -63,39 +62,29 @@ public class LetterController {
     //    @Async("letterProcessorExecutor")
     @PostMapping(consumes = MediaType.APPLICATION_STREAM_JSON_VALUE)
     public Mono<Void> processLetter(@RequestBody Flux<Letter> letterFlux) {
+        int parallelism = letterProcessorExecutor.getMaximumPoolSize();
         letterFlux
                 .onBackpressureDrop(droppedLetter -> log.info("Drop letter {}", droppedLetter))
                 .doOnRequest(value -> {
                     log.info("request({})", value);
                     if(workingQueue.size() == 0) {
-                        letterRequesterService.request(letterProcessorExecutor.getMaximumPoolSize());
+                        letterRequesterService.request((int) value);
                     }
                 })
-                .parallel(letterProcessorExecutor.getMaximumPoolSize() + 1)
-                .runOn(Schedulers.fromExecutor(letterProcessorExecutor))
+//                .parallel(parallelism, parallelism + 20)
+//                .runOn(Schedulers.fromExecutor(letterProcessorExecutor), parallelism + 20)
+                .flatMap(
+                        letter -> Mono.fromCallable(() -> decoder.decode(letter))
+                                .subscribeOn(Schedulers.fromExecutor(letterProcessorExecutor)),
+                        parallelism, parallelism)
                 .subscribe(letter -> {
-                    DecodedLetter decodedLetter = decoder.decode(letter);
-                    log.info("Decoded letter {}", decodedLetter);
+//                    DecodedLetter decodedLetter = decoder.decode(letter);
+                    log.info("Decoded letter {}", letter);
                     counter.increment();
 //                    guardService.send(decodedLetter);
                 });
-//                .publish(workerFlux -> letterFlux
-//                        .parallel(letterProcessorExecutor.getMaximumPoolSize())
-//                        .runOn(Schedulers.fromExecutor(letterProcessorExecutor))
-//                        .map(letter -> decoder.decode(letter))
-//                        .doOnNext(decodedLetter -> log.info("Decoded letter {}", decodedLetter)));
-//                .then();
 
         return Mono.never();
-
-//        DecodedLetter decode = decoder.decode(letter);
-//        counter.increment();
-//
-//        guardRemainingRequest.getAndAccumulate(1, (prev, delta) -> {
-//            guardService.send(decode);
-//            int remaining = prev - delta;
-//            return remaining < 0 ? 0 : remaining;
-//        });
     }
 
 }
