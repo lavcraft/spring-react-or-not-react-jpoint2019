@@ -5,11 +5,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.reactivestreams.Subscription;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.BaseSubscriber;
+import reactor.core.publisher.EmitterProcessor;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Operators;
 import ru.spring.demo.reactive.starter.speed.model.Letter;
 
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author Evgeny Borisov
@@ -19,8 +25,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Setter
 @RequiredArgsConstructor
 public class LetterProducer {
-    private final RickAndMorty faker;
-
+    private final RickAndMorty                           faker;
+    private final ThreadPoolExecutor                     letterProcessorExecutor;
+    private final ObjectProvider<EmitterProcessor<Long>> unicastProcessor;
 
     @SneakyThrows
     public Letter getLetter() {
@@ -30,7 +37,47 @@ public class LetterProducer {
     LinkedBlockingQueue letterQueue = new LinkedBlockingQueue();
 
     public Flux<Letter> letterFlux() {
-        return Flux.generate(synchronousSink -> synchronousSink.next(randomLetter()));
+        return Flux.<Letter>generate(synchronousSink -> synchronousSink.next(randomLetter()))
+                .doOnRequest(value -> log.info("from consumer {}", value))
+                .transform(Operators.liftPublisher((ignore, downstream) -> new BaseSubscriber<Letter>() { //remove letter and discuss about compiler bug. Or not bug, its a question
+                            @Override
+                            protected void hookOnSubscribe(Subscription subscription) {
+                                EmitterProcessor<Long> ifAvailable = unicastProcessor.getIfAvailable();
+                                if(ifAvailable != null) {
+                                    ifAvailable.subscribe(subscription::request);
+                                }
+
+                                downstream.onSubscribe(new Subscription() {
+                                    @Override
+                                    public void request(long n) {
+                                        log.info("from network request {} ", n);
+                                    }
+
+                                    @Override
+                                    public void cancel() {
+                                        subscription.cancel();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            protected void hookOnNext(Letter value) {
+                                downstream.onNext(value);
+                            }
+
+                            @Override
+                            protected void hookOnComplete() {
+                                downstream.onComplete();
+                            }
+
+                            @Override
+                            protected void hookOnError(Throwable throwable) {
+                                downstream.onError(throwable);
+                            }
+                        })
+                );
+
+//        return Flux.generate(synchronousSink -> synchronousSink.next(randomLetter()));
     }
 
     private Letter randomLetter() {

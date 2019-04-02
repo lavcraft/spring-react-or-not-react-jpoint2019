@@ -97,9 +97,9 @@ public class GuardDecider {
 
             notifier.sendNotification(notification);
             counter.increment();
-//            if(workQueue.size() == 0) {
-//                letterRequesterService.request(letterRequesterService.getAdjustmentProperties().getLetterProcessorConcurrencyLevel());
-//            }
+            if(workQueue.size() == 0) {
+                letterRequesterService.request(letterRequesterService.getAdjustmentProperties().getLetterProcessorConcurrencyLevel());
+            }
         }
     }
 }

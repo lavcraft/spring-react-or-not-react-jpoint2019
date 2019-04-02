@@ -24,3 +24,4 @@ a ---|
 8. RSocket — resumability показать
 
 9. в спринге RSocket support будет в 5.2. можно будет на одном порту держать и webflux, и rsocket
+10. Нарисовать картинку взаимодействия source->webclient->netty->extservice
