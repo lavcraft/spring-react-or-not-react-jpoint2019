@@ -28,7 +28,7 @@ public class ReactiveConfiguration {
             @Override
             public Flux<Payload> requestChannel(Publisher<Payload> payloads) {
                 return Flux.from(payloads)
-                        .map(payload -> getNotification(payload, mapper))
+                        .map(payload -> getDecodedLetter(payload, mapper))
                         .flatMap(guardDecider::decideDeferred,
                                 threadPoolExecutor.getMaximumPoolSize()
                         )
@@ -39,7 +39,7 @@ public class ReactiveConfiguration {
     }
 
     @SneakyThrows
-    private DecodedLetter getNotification(Payload payload, ObjectMapper mapper) {
+    private DecodedLetter getDecodedLetter(Payload payload, ObjectMapper mapper) {
         return mapper.readValue(payload.getData().array(), DecodedLetter.class);
     }
 

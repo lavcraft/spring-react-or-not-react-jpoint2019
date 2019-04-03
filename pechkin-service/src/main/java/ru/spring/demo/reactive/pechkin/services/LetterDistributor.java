@@ -60,7 +60,6 @@ public class LetterDistributor {
                 .retry()
                 .subscribe(rSocket -> rSocket.requestChannel(
                         producer.letterFlux()
-//                        .onBackpressureDrop(letter -> log.error("drop {}", letter))
                                 .log()
                                 .doOnNext(payload -> counter.increment())
                                 .map(letter -> DefaultPayload.create(convertToBytes(letter)))
