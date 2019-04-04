@@ -17,7 +17,9 @@ import reactor.netty.tcp.TcpClient;
 import ru.spring.demo.reactive.bigbro.services.LetterDecoder;
 import ru.spring.demo.reactive.starter.speed.model.DecodedLetter;
 import ru.spring.demo.reactive.starter.speed.model.Letter;
+import ru.spring.demo.reactive.starter.speed.rsocket.ReconnectingRSocket;
 
+import java.time.Duration;
 import java.util.concurrent.ThreadPoolExecutor;
 
 @Slf4j
@@ -25,17 +27,17 @@ import java.util.concurrent.ThreadPoolExecutor;
 public class ReactiveConfiguration {
 
     @Bean
-    public Mono<RSocket> guardRSocket() {
-        return RSocketFactory.connect()
-                .transport(WebsocketClientTransport.create(
-                        HttpClient.from(TcpClient.create()
-                                .host("localhost")
-                                .port(8082)),
-                        "/rs"
-                ))
-                .start()
-                .retry()
-                .cache();
+    public RSocket guardRSocket() {
+        return new ReconnectingRSocket(
+                RSocketFactory.connect()
+                        .transport(WebsocketClientTransport.create(
+                                HttpClient.from(TcpClient.create()
+                                        .host("localhost")
+                                        .port(8082)),
+                                "/rs"
+                        ))
+                        .start(), Duration.ofMillis(200), Duration.ofMillis(1000));
+
     }
 
     @Bean
@@ -43,7 +45,7 @@ public class ReactiveConfiguration {
             ThreadPoolExecutor letterProcessorExecutor,
             ObjectMapper objectMapper,
             LetterDecoder decoder,
-            Mono<RSocket> guardRSocket
+            RSocket guardRSocket
     ) {
         return ((setup, sendingSocket) -> Mono.just(new AbstractRSocket() {
 
@@ -58,10 +60,10 @@ public class ReactiveConfiguration {
                                 letterProcessorExecutor.getMaximumPoolSize() + 1)
                         .doOnRequest(value -> log.info("request seq {}", value))
                         .doOnError(throwable -> log.error("payloads error", throwable))
-                        .log()
                         .map(this::convertToPayload)
-                        .transform(decodedLetterFlux -> guardRSocket.flatMapMany(rSocket -> rSocket.requestChannel(decodedLetterFlux)))
-                        .thenMany(Flux.empty());
+                        .compose(guardRSocket::requestChannel)
+                        .<Payload>thenMany(Flux.empty())
+                        .doOnError(t -> log.error("Got Error in sending", t));
             }
 
             @SneakyThrows

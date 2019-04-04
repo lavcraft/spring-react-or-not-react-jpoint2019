@@ -1,5 +1,9 @@
 package ru.spring.demo.reactive.starter.speed.rsocket;
 
+import java.nio.channels.ClosedChannelException;
+import java.time.Duration;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+
 import io.rsocket.Closeable;
 import io.rsocket.Payload;
 import io.rsocket.RSocket;
@@ -11,11 +15,8 @@ import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoProcessor;
-import reactor.retry.Retry;
 
-import java.nio.channels.ClosedChannelException;
-import java.time.Duration;
-
+@SuppressWarnings("unchecked")
 public class ReconnectingRSocket extends BaseSubscriber<RSocket> implements RSocket {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ReconnectingRSocket.class);
@@ -23,7 +24,9 @@ public class ReconnectingRSocket extends BaseSubscriber<RSocket> implements RSoc
     private final Duration backoff;
     private final Duration backoffMax;
 
-    private volatile MonoProcessor<RSocket> rSocketMono;
+    private volatile     MonoProcessor<RSocket>                                          rSocketMono;
+    private static final AtomicReferenceFieldUpdater<ReconnectingRSocket, MonoProcessor> RSOCKET_MONO
+            = AtomicReferenceFieldUpdater.newUpdater(ReconnectingRSocket.class, MonoProcessor.class, "rSocketMono");
 
     public ReconnectingRSocket(Mono<RSocket> rSocketMono, Duration backoff, Duration backoffMax) {
         this.backoff = backoff;
@@ -55,7 +58,6 @@ public class ReconnectingRSocket extends BaseSubscriber<RSocket> implements RSoc
 
     private void reconnect() {
         LOGGER.info("Reconnecting...");
-        rSocketMono = MonoProcessor.create();
         request(1);
     }
 
@@ -63,88 +65,126 @@ public class ReconnectingRSocket extends BaseSubscriber<RSocket> implements RSoc
     public Mono<Void> fireAndForget(Payload payload) {
         return Mono
                 .defer(() -> {
+                    MonoProcessor<RSocket> rSocketMono = this.rSocketMono;
                     if(rSocketMono.isSuccess()) {
                         return rSocketMono.peek()
-                                .fireAndForget(payload);
+                                .fireAndForget(payload)
+                                .doOnError(throwable -> {
+                                    if(throwable instanceof ClosedChannelException) {
+                                        RSOCKET_MONO.compareAndSet(this, rSocketMono, MonoProcessor.create());
+                                    }
+                                });
                     } else {
-                        return rSocketMono.flatMap(rSocket -> rSocket.fireAndForget(payload));
+                        return rSocketMono.flatMap(rSocket ->
+                                rSocket.fireAndForget(payload)
+                                        .doOnError(throwable -> {
+                                            if(throwable instanceof ClosedChannelException) {
+                                                RSOCKET_MONO.compareAndSet(this, rSocketMono, MonoProcessor.create());
+                                            }
+                                        })
+                        );
                     }
-                })
-                .retryWhen(
-                        Retry.anyOf(ClosedChannelException.class)
-                                .randomBackoff(backoff, backoffMax)
-                                .retryMax(Long.MAX_VALUE)
-                );
+                });
     }
 
     @Override
     public Mono<Payload> requestResponse(Payload payload) {
         return Mono
                 .defer(() -> {
+                    MonoProcessor<RSocket> rSocketMono = this.rSocketMono;
                     if(rSocketMono.isSuccess()) {
                         return rSocketMono.peek()
-                                .requestResponse(payload);
+                                .requestResponse(payload)
+                                .doOnError(throwable -> {
+                                    if(throwable instanceof ClosedChannelException) {
+                                        RSOCKET_MONO.compareAndSet(this, rSocketMono, MonoProcessor.create());
+                                    }
+                                });
                     } else {
-                        return rSocketMono.flatMap(rSocket -> rSocket.requestResponse(payload));
+                        return rSocketMono.flatMap(rSocket ->
+                                rSocket.requestResponse(payload)
+                                        .doOnError(throwable -> {
+                                            if(throwable instanceof ClosedChannelException) {
+                                                RSOCKET_MONO.compareAndSet(this, rSocketMono, MonoProcessor.create());
+                                            }
+                                        })
+                        );
                     }
-                })
-                .retryWhen(
-                        Retry.anyOf(ClosedChannelException.class)
-                                .randomBackoff(backoff, backoffMax)
-                                .retryMax(Long.MAX_VALUE)
-                );
+                });
     }
 
     @Override
     public Flux<Payload> requestStream(Payload payload) {
         return Flux
                 .defer(() -> {
+                    MonoProcessor<RSocket> rSocketMono = this.rSocketMono;
                     if(rSocketMono.isSuccess()) {
                         return rSocketMono.peek()
-                                .requestStream(payload);
+                                .requestStream(payload)
+                                .doOnError(throwable -> {
+                                    if(throwable instanceof ClosedChannelException) {
+                                        RSOCKET_MONO.compareAndSet(this, rSocketMono, MonoProcessor.create());
+                                    }
+                                });
                     } else {
-                        return rSocketMono.flatMapMany(rSocket -> rSocket.requestStream(payload));
+                        return rSocketMono.flatMapMany(rSocket ->
+                                rSocket.requestStream(payload)
+                                        .doOnError(throwable -> {
+                                            if(throwable instanceof ClosedChannelException) {
+                                                RSOCKET_MONO.compareAndSet(this, rSocketMono, MonoProcessor.create());
+                                            }
+                                        })
+                        );
                     }
-                })
-                .retryWhen(Retry.anyOf(ClosedChannelException.class)
-                        .randomBackoff(backoff, backoffMax)
-                        .retryMax(Long.MAX_VALUE));
+                });
     }
 
     @Override
     public Flux<Payload> requestChannel(Publisher<Payload> payloads) {
         return Flux
                 .defer(() -> {
-                    System.out.println("Here");
-                    System.out.println(rSocketMono);
+                    MonoProcessor<RSocket> rSocketMono = this.rSocketMono;
                     if(rSocketMono.isSuccess()) {
                         return rSocketMono.peek()
-
-                                .requestChannel(payloads);
+                                .requestChannel(payloads)
+                                .doOnError(throwable -> {
+                                    if(throwable instanceof ClosedChannelException) {
+                                        RSOCKET_MONO.compareAndSet(this, rSocketMono, MonoProcessor.create());
+                                    }
+                                });
                     } else {
-                        return rSocketMono.flatMapMany(rSocket -> rSocket.requestChannel(payloads));
+                        return rSocketMono.flatMapMany(rSocket ->
+                                rSocket.requestChannel(payloads)
+                                        .doOnError(throwable -> {
+                                            if(throwable instanceof ClosedChannelException) {
+                                                RSOCKET_MONO.compareAndSet(this, rSocketMono, MonoProcessor.create());
+                                            }
+                                        })
+                        );
                     }
-                })
-                .retryWhen(Retry.onlyIf(rc -> rc.exception() instanceof ClosedChannelException)
-                        .fixedBackoff(backoff));
+                });
     }
 
     @Override
     public Mono<Void> metadataPush(Payload payload) {
         return Mono
                 .defer(() -> {
+                    MonoProcessor<RSocket> rSocketMono = this.rSocketMono;
                     if(rSocketMono.isSuccess()) {
                         return rSocketMono.peek()
-                                .metadataPush(payload);
+                                .metadataPush(payload)
+                                .doOnError(throwable -> {
+                                    if(throwable instanceof ClosedChannelException) {
+                                        RSOCKET_MONO.compareAndSet(this, rSocketMono, MonoProcessor.create());
+                                    }
+                                });
                     } else {
-                        return rSocketMono.flatMap(rSocket -> rSocket.metadataPush(payload));
+                        return rSocketMono.flatMap(rSocket ->
+                                rSocket.metadataPush(payload)
+                                        .doOnError(__ -> RSOCKET_MONO.compareAndSet(this, rSocketMono, MonoProcessor.create()))
+                        );
                     }
-                })
-                .retryWhen(
-                        Retry.anyOf(ClosedChannelException.class)
-                                .randomBackoff(backoff, backoffMax)
-                                .retryMax(Long.MAX_VALUE)
-                );
+                });
     }
 
     @Override

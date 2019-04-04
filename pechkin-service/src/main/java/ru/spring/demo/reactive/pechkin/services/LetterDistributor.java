@@ -13,12 +13,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.tcp.TcpClient;
 import ru.spring.demo.reactive.pechkin.producer.LetterProducer;
 import ru.spring.demo.reactive.starter.speed.model.Letter;
+import ru.spring.demo.reactive.starter.speed.rsocket.ReconnectingRSocket;
 
+import java.time.Duration;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
@@ -56,14 +59,16 @@ public class LetterDistributor {
 
     @EventListener(ApplicationStartedEvent.class)
     public void init() {
-        bigBrotherRSocketMono
-                .retry()
-                .subscribe(rSocket -> rSocket.requestChannel(
-                        producer.letterFlux()
+        new ReconnectingRSocket(bigBrotherRSocketMono, Duration.ofMillis(200), Duration.ofMillis(1000))
+                .requestChannel(
+                        Flux.defer(() -> producer.letterFlux()
                                 .log()
                                 .doOnNext(payload -> counter.increment())
-                                .map(letter -> DefaultPayload.create(convertToBytes(letter)))
-                ).subscribe());
+                                .map(letter -> DefaultPayload.create(convertToBytes(letter))))
+                )
+                .doOnError(e -> log.error("Got App Error ", e))
+                .retryBackoff(Integer.MAX_VALUE, Duration.ofMillis(200), Duration.ofMillis(1000))
+                .subscribe();
     }
 
     @SneakyThrows
