@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Publisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import reactor.core.publisher.DirectProcessor;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -38,7 +39,14 @@ public class ReactiveConfiguration {
                         ))
                         .start(), Duration.ofMillis(200), Duration.ofMillis(1000));
 
+
     }
+
+
+    final DirectProcessor<Payload> directProcessor = DirectProcessor.create();
+
+
+
 
     @Bean
     public SocketAcceptor ioRsocketSocketAcceptor(
@@ -48,9 +56,12 @@ public class ReactiveConfiguration {
             RSocket guardRSocket
     ) {
         return ((setup, sendingSocket) -> Mono.just(new AbstractRSocket() {
-
             @Override
             public Flux<Payload> requestChannel(Publisher<Payload> payloads) {
+                guardRSocket.requestChannel(directProcessor.onBackpressureDrop())
+                        .subscribe();
+
+
                 return Flux.from(payloads)
 //                        .onBackpressureBuffer(256)
 //                        .onBackpressureDrop(payload -> log.error("Drop {}", payload.getDataUtf8()))
@@ -61,9 +72,11 @@ public class ReactiveConfiguration {
                         .doOnRequest(value -> log.info("request seq {}", value))
                         .doOnError(throwable -> log.error("payloads error", throwable))
                         .map(this::convertToPayload)
-                        .compose(guardRSocket::requestChannel)
-                        .<Payload>thenMany(Flux.empty())
-                        .doOnError(t -> log.error("Got Error in sending", t));
+                        .subscribeWith(directProcessor)
+                        .thenMany(Flux.empty());
+//                        .compose(guardRSocket::requestChannel)
+//                        .<Payload>thenMany(Flux.empty())
+//                        .doOnError(t -> log.error("Got Error in sending", t));
             }
 
             @SneakyThrows

@@ -4,6 +4,7 @@ datasender:
   letter-box-size: 10
   letter-processor-concurrency-level: 2
   url: http://localhost:8081/request
+  processing-time: 500
 
 management:
   endpoints:
