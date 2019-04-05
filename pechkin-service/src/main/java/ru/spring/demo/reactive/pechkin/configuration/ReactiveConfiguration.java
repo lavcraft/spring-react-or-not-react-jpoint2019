@@ -8,6 +8,6 @@ import reactor.core.publisher.EmitterProcessor;
 public class ReactiveConfiguration {
     @Bean
     public EmitterProcessor<Long> unicastProcessorLetter() {
-        return EmitterProcessor.create(false);
+        return EmitterProcessor.create();
     }
 }

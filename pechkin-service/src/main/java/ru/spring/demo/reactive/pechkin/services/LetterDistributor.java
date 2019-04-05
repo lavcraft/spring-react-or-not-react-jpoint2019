@@ -59,11 +59,11 @@ public class LetterDistributor {
                 .accept(MediaType.APPLICATION_STREAM_JSON)
                 .body(
                         producer.letterFlux()
-                                .doOnRequest(value -> log.info("request {}", value))
+//                                .doOnRequest(value -> log.info("request {}", value))
 //                                .onBackpressureBuffer(256)
                                 .doOnNext(letter -> counter.increment())
 //                                .onBackpressureDrop(o -> log.info("Drop {}", o))
-                                .doOnNext(letter -> log.debug("produce letter {}", letter))
+//                                .doOnNext(letter -> log.debug("produce letter {}", letter))
                                 .log(),
                         Letter.class
                 )
@@ -71,7 +71,7 @@ public class LetterDistributor {
                 .doOnError(throwable -> log.error("Sth went wrong {}", throwable.getMessage()))
                 .retryBackoff(Long.MAX_VALUE, Duration.ofMillis(500))
                 .log()
-                .subscribe(aVoid -> log.info("aVoid = " + aVoid));
+                .subscribe(clientResponse -> log.info("clientResponse = " + clientResponse));
     }
 
 }

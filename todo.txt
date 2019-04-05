@@ -61,3 +61,16 @@ Lifecycle reactive stream (reactive hardcore greach)
 3. Паблишер передаёт подписку. Т.е сабскрайбер передаёт себя в паблишер а паблишер ему передаёт subscription
 
 
+
+148 [letter-4] INFO  | onNext(Letter(content=You're like Hitler, except...Hitler cared about Germany, or something., signature=1100100010011101100100000110011, location=Pawn Shop Planet, _original=Summer Smith))
+20149 [letter-4] INFO  | request(2)
+20156 [letter-4] INFO  | request(2)
+20158 [reactor-http-nio-3] INFO  | onNext(Letter(content=WUBBA LUBBA DUB DUBS!!!, signature=10010010000100101110001010000001, location=Dimension C-132, _original=Jessica))
+20158 [reactor-http-nio-3] INFO  | onNext(Letter(content=Existence is pain to a meeseeks Jerry, and we will do anything to alleviate that pain., signature=10101010000101101100110110111111, location=Alphabetrium, _original=Mr. Needful))
+20162 [letter-4] INFO  | onNext(Letter(content=Hello Jerry, come to rub my face in urine again?, signature=11100001110011001110000000111101, location=Gazorpazorp, _original=Krombopulos Michael))
+20162 [letter-4] INFO  | onNext(Letter(content=Ohh yea, you gotta get schwifty., signature=1100001111001111010001101110, location=Cronenberg World, _original=Scary Terry))
+20183 [letter-7] INFO  | requ
+
+почему то исполняются на http-nio тредах
+
+разница между cancel и onComplete ивентах. КОгда соединения закрываются

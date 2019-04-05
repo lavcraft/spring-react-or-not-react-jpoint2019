@@ -15,18 +15,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RequestController {
     private final AtomicInteger                          remainginRequests;
     private final AdjustmentProperties                   adjustmentProperties;
-    private final ObjectProvider<EmitterProcessor<Long>> lettersProcessor;
+    private final ObjectProvider<EmitterProcessor<Long>> emitterProcessor;
 
     public RequestController(AdjustmentProperties adjustmentProperties,
-                             ObjectProvider<EmitterProcessor<Long>> lettersProcessor) {
+                             ObjectProvider<EmitterProcessor<Long>> emitterProcessor) {
         this.remainginRequests = adjustmentProperties.getRequest();
         this.adjustmentProperties = adjustmentProperties;
-        this.lettersProcessor = lettersProcessor;
+        this.emitterProcessor = emitterProcessor;
     }
 
     @GetMapping("/request/{request}")
     public void request(@PathVariable int request) {
-        lettersProcessor.ifAvailable(longEmitterProcessor -> {
+        emitterProcessor.ifAvailable(longEmitterProcessor -> {
             log.info("request controller {}", request);
             longEmitterProcessor.onNext((long) request);
         });

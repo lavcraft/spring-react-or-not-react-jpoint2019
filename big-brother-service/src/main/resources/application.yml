@@ -1,7 +1,7 @@
 datasender:
-  slow-multiplier: 1
   letter-processor-concurrency-level: 8
   url: http://localhost:8080/request
+  processing-time: 250
 
 server:
   port: 8081
