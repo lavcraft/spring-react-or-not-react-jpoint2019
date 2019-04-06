@@ -16,6 +16,7 @@ subprojects {
 
     repositories {
         jcenter()
+        maven { url 'https://jitpack.io' }
     }
 
     dependencies {
@@ -41,6 +42,9 @@ subprojects {
              'org.fusesource.jansi:jansi:1.17.1',
              'org.codehaus.groovy:groovy-all:2.5.6',
              'com.google.guava:guava:27.1-jre',
+             'com.github.CollaborationInEncapsulation.spring-boot-rsocket:spring-boot-starter-rsocket:0.0.1.RELEASE',
+             'io.rsocket:rsocket-transport-netty:0.11.21',
+             'io.rsocket:rsocket-core:0.11.21',
             ].each {
                 implementation it
             }
@@ -63,13 +67,15 @@ subprojects {
             testAnnotationProcessor it
         }
 
-        implementation 'org.springframework.boot:spring-boot-starter-web',
+        implementation 'org.springframework.boot:spring-boot-starter-webflux',
                 'org.springframework.boot:spring-boot-starter-actuator',
+                'io.rsocket:rsocket-transport-netty',
                 'com.google.guava:guava',
                 'io.dropwizard.metrics:metrics-core',
                 'org.beryx:text-io',
                 'org.beryx:text-io-web',
-                'org.fusesource.jansi:jansi'
+                'org.fusesource.jansi:jansi',
+                'io.projectreactor.addons:reactor-extra'
 
         testImplementation 'org.mockito:mockito-core',
                 'org.mockito:mockito-junit-jupiter',

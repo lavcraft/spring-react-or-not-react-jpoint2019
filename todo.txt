@@ -7,6 +7,20 @@
 1. [v] пририсовать буферы на console-dashboard
 2. [v] guard который дропает реквесты
 3. начать переписывать с spring-react (webflux + tcp backpressure)
-...
+    1. Напороться на doNext
+    2. Переписать на subscriber
+    3. Напороться
 4. сдедать свою реализацию Observable с request(n) таким же как на шаге 2
 5. переписать реализацию на честный backpressure c RSocket
+
+     --- b
+a ---|
+     --- c
+
+6. Reactor - Netty просит по 32 элемента. У него своц BP между "нетворком" и "клиентом"
+6.5 (Олег) Почему тогда при добавлении onBPBuffer(256) начинает просить MAX_LONG а не 32 или 256?
+7. reactor-extra и более адекватный backoff стратегия
+
+8. RSocket — resumability показать
+
+9. в спринге RSocket support будет в 5.2. можно будет на одном порту держать и webflux, и rsocket

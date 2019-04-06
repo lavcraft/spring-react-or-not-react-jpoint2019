@@ -1,0 +1,14 @@
+server:
+  port: 8080
+
+spring:
+  devtools:
+    livereload:
+      port: 10580
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+

@@ -1,1 +1,1 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.naya.speedadjuster.configuration.SpeedAdjusterConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=ru.spring.demo.reactive.starter.speed.configuration.SpeedAdjusterConfiguration
